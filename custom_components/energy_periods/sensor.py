@@ -9,7 +9,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_entities([
-        EnergyPeriodSensor(coordinator)
+        EnergyPeriodSensor(coordinator, entry.entry_id)
     ])
 
 
