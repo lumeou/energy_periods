@@ -2,7 +2,7 @@
   "domain": "energy_periods",
   "name": "Energy Periods",
   "version": "0.1.0",
-  "documentation": "https://github.com/tu_usuario/energy_periods",
+  "documentation": "https://github.com/lumeou/energy_periods",
   "requirements": ["icalendar", "aiohttp"],
   "config_flow": true,
   "codeowners": ["@lumeou"]
