@@ -161,10 +161,10 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             self._edit_index = idx
             return await self.async_step_edit_form()
     
-        options = {
-            str(i): f"{p['start']} → {p['end']} ({p['type']})"
+        options = [
+            {"value": str(i), "label": f"{p['start']} → {p['end']} ({p['type']})"}
             for i, p in enumerate(periods)
-        }
+        ]
     
         return self.async_show_form(
             step_id="edit",
@@ -174,7 +174,30 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
                 )
             })
         )
+
+    async def async_step_edit_form(self, user_input=None):
     
+        periods = self.periods[self._current_day_type]
+    
+        if self._edit_index is None or self._edit_index >= len(periods):
+            return await self.async_step_editor()
+    
+        # guardar cambios
+        if user_input is not None:
+            periods[self._edit_index] = user_input
+            return await self.async_step_editor()
+    
+        # cargar valores actuales
+        p = periods[self._edit_index]
+    
+        return self.async_show_form(
+            step_id="edit_form",
+            data_schema=vol.Schema({
+                vol.Required("start", default=p["start"]): selector.TimeSelector(),
+                vol.Required("end", default=p["end"]): selector.TimeSelector(),
+                vol.Required("type", default=p["type"]): selector.TextSelector(),
+            })
+        )
 
     async def async_step_delete(self, user_input=None):
     
@@ -186,10 +209,10 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
                 periods.pop(idx)
             return await self.async_step_editor()
     
-        options = {
-            str(i): f"{p['start']} → {p['end']} ({p['type']})"
+        options = [
+            {"value": str(i), "label": f"{p['start']} → {p['end']} ({p['type']})"}
             for i, p in enumerate(periods)
-        }
+        ]
     
         return self.async_show_form(
             step_id="delete",
