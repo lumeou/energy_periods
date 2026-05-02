@@ -1,0 +1,10 @@
+{
+  "options": {
+    "step": {
+      "editor": {
+        "title": "Edit periods",
+        "description": "Current periods:\n\n{periods}"
+      }
+    }
+  }
+}
