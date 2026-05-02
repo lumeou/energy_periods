@@ -55,7 +55,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_working_day(self, user_input=None):
         self._current_day_type = "working_day"
-        return await self._render_list()
+        return await self.async_step_editor()
 
     # ----------------------------------------------------
     # ENTRADA NON WORKING DAY
@@ -63,131 +63,146 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_non_working_day(self, user_input=None):
         self._current_day_type = "non_working_day"
-        return await self._render_list()
+        return await self.async_step_editor()
 
     # ----------------------------------------------------
-    # LISTA DE TRAMOS (VIEW PRINCIPAL DEL EDITOR)
+    # EDITOR
     # ----------------------------------------------------
 
-    async def _render_list(self):
-
-        day_type = self._current_day_type
-        periods = self.periods.setdefault(day_type, [])
-
-        menu = {}
-
-        # cada tramo abre un STEP de edición o borrado
-        for i, p in enumerate(periods):
-            menu[f"edit_{i}"] = f"✏️ {p['start']} → {p['end']} ({p['type']})"
-            menu[f"delete_{i}"] = f"🗑 {p['start']} → {p['end']} ({p['type']})"
-
-        # acciones globales
-        menu["add"] = "➕ Add period"
-        menu["back"] = "⬅ Back"
-        menu["save"] = "💾 Save"
-
+    async def async_step_editor(self, user_input=None):
+    
+        periods = self.periods.setdefault(self._current_day_type, [])
+    
+        if user_input is not None:
+            action = next(iter(user_input))
+    
+            if action == "add":
+                return await self.async_step_form()
+    
+            if action == "edit":
+                return await self.async_step_select_edit()
+    
+            if action == "delete":
+                return await self.async_step_select_delete()
+    
+            if action == "back":
+                return await self.async_step_init()
+    
+            if action == "save":
+                return await self.async_step_save()
+    
+        # SOLO UI ESTÁTICA
+        menu = {
+            "add": "➕ Add period",
+            "edit": "✏️ Edit period",
+            "delete": "🗑 Delete period",
+            "back": "⬅ Back",
+            "save": "💾 Save",
+        }
+    
         return self.async_show_menu(
-            step_id="period_list",
+            step_id="editor",
             menu_options=menu
         )
 
-    # ----------------------------------------------------
-    # DISPATCH LISTA (ÚNICO PUNTO DE CONTROL)
-    # ----------------------------------------------------
-
-    async def async_step_period_list(self, user_input=None):
-
-        if not user_input:
-            return await self._render_list()
-
-        action = next(iter(user_input))
+    async def async_step_select_edit(self, user_input=None):
+    
         periods = self.periods[self._current_day_type]
-
-        # -------------------------
-        # BACK
-        # -------------------------
-        if action == "back":
-            return await self.async_step_init()
-
-        # -------------------------
-        # SAVE
-        # -------------------------
-        if action == "save":
-            return await self.async_step_save()
-
-        # -------------------------
-        # ADD
-        # -------------------------
-        if action == "add":
-            return await self.async_step_add_period()
-
-        # -------------------------
-        # EDIT
-        # -------------------------
-        if action.startswith("edit_"):
-            idx = int(action.split("_")[1])
-            return await self.async_step_edit_period(idx)
-
-        # -------------------------
-        # DELETE
-        # -------------------------
-        if action.startswith("delete_"):
-            idx = int(action.split("_")[1])
-
-            if 0 <= idx < len(periods):
-                periods.pop(idx)
-
-            return await self._render_list()
-
-        return await self._render_list()
-
-    # ----------------------------------------------------
-    # ADD PERIOD
-    # ----------------------------------------------------
-
-    async def async_step_add_period(self, user_input=None):
-
+    
         if user_input is not None:
-            self.periods.setdefault(self._current_day_type, []).append(user_input)
-            return await self._render_list()
-
-        schema = vol.Schema({
-            vol.Required("start"): selector.TimeSelector(),
-            vol.Required("end"): selector.TimeSelector(),
-            vol.Required("type"): selector.TextSelector(),
-        })
-
+            idx = int(user_input["index"])
+            self._edit_index = idx
+            return await self.async_step_form()
+    
+        options = {
+            str(i): f"{p['start']} → {p['end']} ({p['type']})"
+            for i, p in enumerate(periods)
+        }
+    
         return self.async_show_form(
-            step_id="add_period",
-            data_schema=schema
+            step_id="select_edit",
+            data_schema=vol.Schema({
+                vol.Required("index"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=options)
+                )
+            })
         )
 
-    # ----------------------------------------------------
-    # EDIT PERIOD (reutiliza form)
-    # ----------------------------------------------------
-
-    async def async_step_edit_period(self, idx, user_input=None):
-
+    async def async_step_select_delete(self, user_input=None):
+    
         periods = self.periods[self._current_day_type]
-
-        if idx >= len(periods):
-            return await self._render_list()
-
+    
         if user_input is not None:
-            periods[idx] = user_input
-            return await self._render_list()
-
-        p = periods[idx]
-
-        schema = vol.Schema({
-            vol.Required("start", default=p["start"]): selector.TimeSelector(),
-            vol.Required("end", default=p["end"]): selector.TimeSelector(),
-            vol.Required("type", default=p["type"]): selector.TextSelector(),
-        })
-
+            idx = int(user_input["index"])
+            if 0 <= idx < len(periods):
+                periods.pop(idx)
+            return await self.async_step_editor()
+    
+        options = {
+            str(i): f"{p['start']} → {p['end']} ({p['type']})"
+            for i, p in enumerate(periods)
+        }
+    
         return self.async_show_form(
-            step_id="edit_period",
-            data_schema=schema
+            step_id="select_delete",
+            data_schema=vol.Schema({
+                vol.Required("index"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=options)
+                )
+            })
+        )
+
+    async def async_step_select_delete(self, user_input=None):
+    
+        periods = self.periods[self._current_day_type]
+    
+        if user_input is not None:
+            idx = int(user_input["index"])
+            if 0 <= idx < len(periods):
+                periods.pop(idx)
+            return await self.async_step_editor()
+    
+        options = {
+            str(i): f"{p['start']} → {p['end']} ({p['type']})"
+            for i, p in enumerate(periods)
+        }
+    
+        return self.async_show_form(
+            step_id="select_delete",
+            data_schema=vol.Schema({
+                vol.Required("index"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=options)
+                )
+            })
+        )
+
+    # FORM ADD / EDIT (UNIFICADO)
+    async def async_step_form(self, user_input=None):
+    
+        periods = self.periods[self._current_day_type]
+        editing = hasattr(self, "_edit_index") and self._edit_index is not None
+    
+        defaults = {}
+        if editing:
+            defaults = periods[self._edit_index]
+    
+        if user_input is not None:
+    
+            if editing:
+                periods[self._edit_index] = user_input
+                self._edit_index = None
+            else:
+                periods.append(user_input)
+    
+            return await self.async_step_editor()
+    
+        return self.async_show_form(
+            step_id="form",
+            data_schema=vol.Schema({
+                vol.Required("start", default=defaults.get("start")): selector.TimeSelector(),
+                vol.Required("end", default=defaults.get("end")): selector.TimeSelector(),
+                vol.Required("type", default=defaults.get("type")): selector.TextSelector(),
+            })
         )
 
     # ----------------------------------------------------
