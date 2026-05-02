@@ -2,10 +2,14 @@ import aiohttp
 from icalendar import Calendar
 from datetime import datetime
 
-class ICSProvider:
-    def __init__(self, source, tag):
+from . import BaseHolidayProvider, register_provider
+
+@register_provider("ics")
+class ICSProvider(BaseHolidayProvider):
+
+    def __init__(self, source, tag="holiday"):
+        super().__init__(tag)
         self.source = source
-        self.tag = tag
 
     async def get_holidays(self):
         if self.source.startswith("http"):
@@ -27,6 +31,7 @@ class ICSProvider:
             if isinstance(dt, datetime):
                 dt = dt.date()
 
-            holidays.setdefault(dt.isoformat(), set()).add(self.tag)
+            date_str = dt.isoformat()
+            holidays.setdefault(date_str, set()).add(self.tag)
 
         return holidays
