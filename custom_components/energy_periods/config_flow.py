@@ -71,25 +71,8 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_editor(self, user_input=None):
     
-        periods = self.periods.setdefault(self._current_day_type, [])
-    
-        if user_input is not None:
-            action = next(iter(user_input))
-    
-            if action == "add":
-                return await self.async_step_form()
-    
-            if action == "edit":
-                return await self.async_step_select_edit()
-    
-            if action == "delete":
-                return await self.async_step_select_delete()
-    
-            if action == "back":
-                return await self.async_step_init()
-    
-            if action == "save":
-                return await self.async_step_save()
+        #periods = self.periods.setdefault(self._current_day_type, [])
+        periods = self.periods[self._current_day_type]
     
         # SOLO UI ESTÁTICA
         menu = {
@@ -105,14 +88,29 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             menu_options=menu
         )
 
-    async def async_step_select_edit(self, user_input=None):
+    async def async_step_add(self, user_input=None):
+    
+        if user_input is not None:
+            self.periods[self._current_day_type].append(user_input)
+            return await self.async_step_editor()
+    
+        return self.async_show_form(
+            step_id="add",
+            data_schema=vol.Schema({
+                vol.Required("start"): selector.TimeSelector(),
+                vol.Required("end"): selector.TimeSelector(),
+                vol.Required("type"): selector.TextSelector(),
+            })
+        )
+
+    async def async_step_edit(self, user_input=None):
     
         periods = self.periods[self._current_day_type]
     
         if user_input is not None:
             idx = int(user_input["index"])
             self._edit_index = idx
-            return await self.async_step_form()
+            return await self.async_step_edit_form()
     
         options = {
             str(i): f"{p['start']} → {p['end']} ({p['type']})"
@@ -120,15 +118,16 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         }
     
         return self.async_show_form(
-            step_id="select_edit",
+            step_id="edit",
             data_schema=vol.Schema({
                 vol.Required("index"): selector.SelectSelector(
                     selector.SelectSelectorConfig(options=options)
                 )
             })
         )
+    
 
-    async def async_step_select_delete(self, user_input=None):
+    async def async_step_delete(self, user_input=None):
     
         periods = self.periods[self._current_day_type]
     
@@ -144,7 +143,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         }
     
         return self.async_show_form(
-            step_id="select_delete",
+            step_id="delete",
             data_schema=vol.Schema({
                 vol.Required("index"): selector.SelectSelector(
                     selector.SelectSelectorConfig(options=options)
@@ -152,58 +151,8 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             })
         )
 
-    async def async_step_select_delete(self, user_input=None):
-    
-        periods = self.periods[self._current_day_type]
-    
-        if user_input is not None:
-            idx = int(user_input["index"])
-            if 0 <= idx < len(periods):
-                periods.pop(idx)
-            return await self.async_step_editor()
-    
-        options = {
-            str(i): f"{p['start']} → {p['end']} ({p['type']})"
-            for i, p in enumerate(periods)
-        }
-    
-        return self.async_show_form(
-            step_id="select_delete",
-            data_schema=vol.Schema({
-                vol.Required("index"): selector.SelectSelector(
-                    selector.SelectSelectorConfig(options=options)
-                )
-            })
-        )
-
-    # FORM ADD / EDIT (UNIFICADO)
-    async def async_step_form(self, user_input=None):
-    
-        periods = self.periods[self._current_day_type]
-        editing = hasattr(self, "_edit_index") and self._edit_index is not None
-    
-        defaults = {}
-        if editing:
-            defaults = periods[self._edit_index]
-    
-        if user_input is not None:
-    
-            if editing:
-                periods[self._edit_index] = user_input
-                self._edit_index = None
-            else:
-                periods.append(user_input)
-    
-            return await self.async_step_editor()
-    
-        return self.async_show_form(
-            step_id="form",
-            data_schema=vol.Schema({
-                vol.Required("start", default=defaults.get("start")): selector.TimeSelector(),
-                vol.Required("end", default=defaults.get("end")): selector.TimeSelector(),
-                vol.Required("type", default=defaults.get("type")): selector.TextSelector(),
-            })
-        )
+    async def async_step_back(self, user_input=None):
+        return await self.async_step_init()
 
     # ----------------------------------------------------
     # SAVE FINAL
