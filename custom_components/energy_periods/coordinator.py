@@ -44,5 +44,35 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
     def is_non_working_day(self):
         return self.is_weekend() or self.is_public_holiday()
 
+    
     def get_raw_holidays(self):
         return self.data
+
+    
+    def get_day_type(self):
+        return "non_working_day" if self.is_non_working_day() else "working_day"
+
+    def get_periods_for_today(self):
+        day_type = self.get_day_type()
+        return self.config.get("periods", {}).get(day_type, [])
+        
+    def get_fallback(self):
+        return self.config.get("periods", {}).get("fallback", {"type": "unknown"})
+
+    def validate_periods(periods):
+        sorted_periods = sorted(periods, key=lambda x: x["start"])
+    
+        for i in range(len(sorted_periods) - 1):
+            if sorted_periods[i]["end"] > sorted_periods[i + 1]["start"]:
+                raise ValueError("Overlapping periods detected")
+    
+        return True
+
+    def get_current_type(self, now):
+        periods = self.get_periods_for_today()
+    
+        for p in periods:
+            if p["start"] <= now < p["end"]:
+                return p["type"]
+    
+        return self.get_fallback()["type"]
