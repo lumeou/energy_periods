@@ -31,8 +31,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
-        self.config_entry = config_entry
-
         # estado persistente del editor
         self.periods = dict(config_entry.options.get("periods", {}))
         self._current_day_type = None
