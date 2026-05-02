@@ -4,6 +4,7 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass, providers, config):
@@ -15,7 +16,6 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         )
         self.providers = providers
         self.config = config
-        self.data = {}
 
     async def _async_update_data(self):
         merged = {}
@@ -29,9 +29,20 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
         _LOGGER.debug("Merged holidays: %s", merged)
         
-        self.data = merged
         return merged
 
-    def is_today_holiday(self):
+    def is_public_holiday(self):
+        if not self.data:
+            return False
+    
         today = date.today().isoformat()
         return today in self.data
+    
+    def is_weekend(self):
+        return date.today().weekday() >= 5
+
+    def is_non_working_day(self):
+        return self.is_weekend() or self.is_public_holiday()
+
+    def get_raw_holidays(self):
+        return self.data
