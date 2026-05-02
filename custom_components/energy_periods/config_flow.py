@@ -240,7 +240,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
         return self.async_create_entry(
             title="Energy Periods",
-            options={
+            data={
                 "periods": self.periods
             }
         )
