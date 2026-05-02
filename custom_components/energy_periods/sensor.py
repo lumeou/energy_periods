@@ -27,7 +27,8 @@ class EnergyPeriodSensor(SensorEntity):
         return "mdi:clock-time-four"
     
     @property
-    def state(self):      
+    def state(self):
+        now = datetime.now()
         return get_period(
             now,
             self.coordinator.config,
