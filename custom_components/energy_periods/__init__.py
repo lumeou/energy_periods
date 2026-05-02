@@ -10,7 +10,7 @@ async def async_setup_entry(hass, entry):
     sources = entry.data.get("sources", [])
     config = entry.options.get("periods", DEFAULT_CONFIG)
 
-    _LOGGER.debug(config)
+    _LOGGER.debug("Config: %s", config)
 
     providers = []
 
