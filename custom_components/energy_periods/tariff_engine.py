@@ -10,6 +10,6 @@ def get_period(now, config, is_holiday):
         end = eh * 60 + em
 
         if start <= minutes < end:
-            return block["period"]
+            return block["type"]
 
     return "unknown"
