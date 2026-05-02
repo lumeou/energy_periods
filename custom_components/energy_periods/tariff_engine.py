@@ -1,5 +1,5 @@
 def get_period(now, config, is_holiday):
-    day_type = "holiday" if is_holiday else "workday"
+    day_type = "non_working_day" if is_holiday else "working_day"
     minutes = now.hour * 60 + now.minute
 
     for block in config.get(day_type, []):
