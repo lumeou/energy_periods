@@ -1,0 +1,9 @@
+{
+  "config": {
+    "step": {
+      "editor": {
+        "description": "Current periods:\n\n{periods}"
+      }
+    }
+  }
+}
