@@ -71,8 +71,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_editor(self, user_input=None):
     
-        #periods = self.periods.setdefault(self._current_day_type, [])
-        periods = self.periods[self._current_day_type]
+        periods = self.periods.setdefault(self._current_day_type, [])
     
         # SOLO UI ESTÁTICA
         menu = {
