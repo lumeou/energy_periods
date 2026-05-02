@@ -20,5 +20,9 @@ class HolidayBinarySensor(BinarySensorEntity):
         return "Is holiday today"
 
     @property
+    def icon(self):
+        return "mdi:calendar"
+    
+    @property
     def is_on(self):
         return self.coordinator.is_today_holiday()
