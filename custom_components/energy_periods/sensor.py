@@ -25,8 +25,22 @@ class EnergyPeriodSensor(SensorEntity):
     @property
     def state(self):
         now = datetime.now()
+        
+        is_holiday = (
+            self.coordinator.is_today_holiday()
+            or now.weekday() >= 5
+        )
+        
         return get_period(
             now,
             self.coordinator.config,
-            self.coordinator.is_today_holiday()
+            is_holiday
         )
+
+    @property
+    def extra_state_attributes(self):
+        now = datetime.now()
+        return {
+            "is_weekend": now.weekday() >= 5,
+            "is_holiday": self.coordinator.is_today_holiday(),
+        }
