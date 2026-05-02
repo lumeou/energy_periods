@@ -112,6 +112,5 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             }
         )
 
-    @staticmethod
-    def async_get_options_flow(config_entry):
-        return EnergyPeriodsOptionsFlow(config_entry)
+def async_get_options_flow(config_entry):
+    return EnergyPeriodsOptionsFlow(config_entry)
