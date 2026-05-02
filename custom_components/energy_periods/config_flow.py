@@ -38,7 +38,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         self.periods = dict(config_entry.options.get("periods", {}))
         self._current_day_type = None
 
-        _LOGGER.debug("Periods: %s", config)
+        _LOGGER.debug("Periods: %s", self.periods)
 
 
     # ----------------------------------------------------
