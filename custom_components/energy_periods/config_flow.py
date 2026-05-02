@@ -61,7 +61,8 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_working_day(self, user_input=None):
         self._current_day_type = "working_day"
-        return await self.async_step_editor()
+        #return await self.async_step_editor()
+        return await self._show_periods_list()
 
     # ----------------------------------------------------
     # ENTRADA NON WORKING DAY
@@ -69,12 +70,37 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_non_working_day(self, user_input=None):
         self._current_day_type = "non_working_day"
-        return await self.async_step_editor()
+        #return await self.async_step_editor()
+        return await self._show_periods_list()
 
     # ----------------------------------------------------
     # EDITOR
     # ----------------------------------------------------
 
+    async def _show_periods_list(self):
+
+        day_type = self._current_day_type
+        periods = self.periods.setdefault(day_type, [])
+    
+        if periods:
+            text = "\n".join(
+                f"{p['start']} → {p['end']} ({p['type']})"
+                for p in periods
+            )
+        else:
+            text = "No periods defined"
+    
+        return self.async_show_form(
+            step_id="periods_list",
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                "periods": text
+            }
+        )
+
+    async def async_step_periods_list(self, user_input=None):
+        return await self.async_step_editor()
+    
     async def async_step_editor(self, user_input=None):
     
         periods = self.periods.setdefault(self._current_day_type, [])
