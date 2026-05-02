@@ -8,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry):
     sources = entry.data.get("sources", [])
-    config = entry.option["periods"]
+    config = entry.options["periods"]
 
     _LOGGER.debug("Config: %s", config)
 
