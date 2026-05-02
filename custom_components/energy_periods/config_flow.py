@@ -76,49 +76,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     # ----------------------------------------------------
     # EDITOR
     # ----------------------------------------------------
-"""
-    async def _show_periods_list(self):
 
-        day_type = self._current_day_type
-        periods = self.periods.setdefault(day_type, [])
-    
-        if periods:
-            text = "\n".join(
-                f"{p['start']} → {p['end']} ({p['type']})"
-                for p in periods
-            )
-        else:
-            text = "No periods defined"
-    
-        return self.async_show_form(
-            step_id="periods_list",
-            data_schema=vol.Schema({}),
-            description_placeholders={
-                "periods": text
-            }
-        )
-
-    async def async_step_periods_list(self, user_input=None):
-        return await self.async_step_editor()
-    
-    async def async_step_editor(self, user_input=None):
-    
-        periods = self.periods.setdefault(self._current_day_type, [])
-    
-        # SOLO UI ESTÁTICA
-        menu = {
-            "add": "➕ Add period",
-            "edit": "✏️ Edit period",
-            "delete": "🗑 Delete period",
-            "back": "⬅ Back",
-            "save": "💾 Save",
-        }
-    
-        return self.async_show_menu(
-            step_id="editor",
-            menu_options=menu
-        )
-"""
     async def async_step_editor(self, user_input=None):
     
         periods = self.periods.setdefault(self._current_day_type, [])
