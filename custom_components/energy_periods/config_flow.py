@@ -2,6 +2,9 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "energy_periods"
 
@@ -34,6 +37,9 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         # estado persistente del editor
         self.periods = dict(config_entry.options.get("periods", {}))
         self._current_day_type = None
+
+        _LOGGER.debug("Periods: %s", config)
+
 
     # ----------------------------------------------------
     # MENÚ PRINCIPAL
