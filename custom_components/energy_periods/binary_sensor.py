@@ -13,6 +13,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class HolidayBinarySensor(BinarySensorEntity):
     def __init__(self, coordinator):
         self.coordinator = coordinator
+        self._attr_unique_id = f"{entry_id}_holiday_today"
 
     @property
     def name(self):
