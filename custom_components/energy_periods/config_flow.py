@@ -48,10 +48,10 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         )
 
     async def async_step_working_day(self, user_input=None):
-        return await self._render_period_list("working_day", user_input)
+        return await self._render_period_list()
 
     async def async_step_non_working_day(self, user_input=None):
-        return await self._render_period_list("non_working_day", user_input)
+        return await self._render_period_list()
 
     
     async def _render_period_list(self):
