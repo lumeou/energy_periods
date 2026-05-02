@@ -155,6 +155,9 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_edit(self, user_input=None):
     
         periods = self.periods[self._current_day_type]
+
+        if not periods:
+            return await self.async_step_editor()
     
         if user_input is not None:
             idx = int(user_input["index"])
@@ -178,7 +181,10 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_edit_form(self, user_input=None):
     
         periods = self.periods[self._current_day_type]
-    
+
+        if not periods:
+            return await self.async_step_editor()
+        
         if self._edit_index is None or self._edit_index >= len(periods):
             return await self.async_step_editor()
     
