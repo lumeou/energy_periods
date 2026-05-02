@@ -23,6 +23,10 @@ class EnergyPeriodSensor(SensorEntity):
         return "Energy period"
 
     @property
+    def icon(self):
+        return "mdi:clock-time-four"
+    
+    @property
     def state(self):
         now = datetime.now()
         
