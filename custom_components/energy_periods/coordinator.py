@@ -1,12 +1,15 @@
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from datetime import timedelta, date
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass, providers, config):
         super().__init__(
             hass,
-            logger=None,
+            logger=_LOGGER,
             name="energy_periods",
             update_interval=timedelta(hours=12),
         )
@@ -19,9 +22,13 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
         for p in self.providers:
             data = await p.get_holidays()
+            _LOGGER.debug("Provider returned: %s", data)
+            
             for d, tags in data.items():
                 merged.setdefault(d, set()).update(tags)
 
+        _LOGGER.debug("Merged holidays: %s", merged)
+        
         self.data = merged
         return merged
 
