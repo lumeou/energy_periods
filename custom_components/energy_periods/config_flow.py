@@ -33,6 +33,10 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self.periods = dict(config_entry.options.get("periods", {}))
 
+        # contexto del editor actual
+        self._current_day_type = None
+        self._edit_index = None
+
     async def async_step_init(self, user_input=None):
         return self.async_show_menu(
             step_id="init",
@@ -50,48 +54,57 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return await self._render_period_list("non_working_day", user_input)
 
     
-    async def _render_period_list(self, day_type, user_input=None):
-    
+    async def _render_period_list(self):
+
+        day_type = self._current_day_type
         periods = self.periods.setdefault(day_type, [])
-    
-        # Procesar acciones
-        if user_input:
-            action = list(user_input.keys())[0]
 
-            if action.endswith(":add"):
-                return await self._add_period_form(day_type)
-            
-            if ":delete_" in action:
-                dt, rest = action.split(":")
-                idx = int(rest.split("_")[1])
+        menu_options = {}
 
-                if dt in self.periods and idx < len(self.periods[dt]):
-                    self.periods[dt].pop(idx)
-
-                return await self._render_period_list(dt)
-            
-            if action.endswith(":back"):
-                return await self.async_step_init()
-        
-            if action.endswith(":save"):
-                return await self.async_step_save()
-        
-        # UI lista
-        options = {}
-    
+        # lista de tramos
         for i, p in enumerate(periods):
-            options[f"{day_type}:delete_{i}"] = (
+            menu_options[f"delete_{i}"] = (
                 f"🗑 {p['start']} → {p['end']} ({p['type']})"
             )
-    
-        options[f"{day_type}:add"] = "➕ Add period"
-        options[f"{day_type}:back"] = "⬅ Back"
-        options[f"{day_type}:save"] = "💾 Save"
-    
+
+        # acciones globales del editor
+        menu_options["add"] = "➕ Add period"
+        menu_options["back"] = "⬅ Back"
+        menu_options["save"] = "💾 Save"
+
         return self.async_show_menu(
-            step_id=day_type,
-            menu_options=options
+            step_id="period_editor",
+            menu_options=menu_options
         )
+
+
+    async def async_step_period_editor(self, user_input=None):
+
+        if not user_input:
+            return await self._render_period_list()
+
+        action = list(user_input.keys())[0]
+        day_type = self._current_day_type
+        periods = self.periods.setdefault(day_type, [])
+
+        if action == "add":
+            return await self._add_period_form()
+
+        if action == "save":
+            return await self.async_step_save()
+
+        if action == "back":
+            return await self.async_step_init()
+
+        if action.startswith("delete_"):
+            idx = int(action.split("_")[1])
+
+            if 0 <= idx < len(periods):
+                periods.pop(idx)
+
+            return await self._render_period_list()
+
+        return await self._render_period_list()
 
     
     async def _add_period_form(self, day_type):
@@ -103,26 +116,18 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         })
     
         return self.async_show_form(
-            step_id=f"add_{day_type}",
+            step_id="add_period",
             data_schema=schema
         )
 
     
-    async def async_step_add_working_day(self, user_input=None):
-    
-        if user_input is not None:
-            self.periods.setdefault("working_day", []).append(user_input)
-            return await self._render_period_list("working_day")
-    
-        return await self._add_period_form("working_day")
+    async def async_step_add_period(self, user_input=None):
 
-    
-    async def async_step_add_non_working_day(self, user_input=None):
         if user_input is not None:
-            self.periods.setdefault("non_working_day", []).append(user_input)
-            return await self._render_period_list("non_working_day")
-    
-        return await self._add_period_form("non_working_day")
+            self.periods.setdefault(self._current_day_type, []).append(user_input)
+            return await self._render_period_list()
+
+        return await self._add_period_form()
 
     
     async def async_step_save(self, user_input=None):
