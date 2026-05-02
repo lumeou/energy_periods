@@ -1,5 +1,6 @@
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 
 DOMAIN = "energy_periods"
 
@@ -19,6 +20,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         })
 
         return self.async_show_form(step_id="user", data_schema=schema)
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return EnergyPeriodsOptionsFlow(config_entry)
+
 
 class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
@@ -111,6 +118,3 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
                 "periods": self.periods
             }
         )
-
-def async_get_options_flow(config_entry):
-    return EnergyPeriodsOptionsFlow(config_entry)
