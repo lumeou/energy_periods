@@ -1,6 +1,6 @@
 from .providers import get_provider
 from .coordinator import EnergyPeriodsCoordinator
-from .const import DOMAIN, DEFAULT_CONFIG
+from .const import DOMAIN
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -8,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry):
     sources = entry.data.get("sources", [])
-    config = entry.options.get("periods", DEFAULT_CONFIG)
+    config = entry.option["periods"]
 
     _LOGGER.debug("Config: %s", config)
 
