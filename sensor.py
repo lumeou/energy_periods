@@ -1,0 +1,20 @@
+from homeassistant.components.sensor import SensorEntity
+from datetime import datetime
+from .tariff_engine import get_period
+
+class EnergyPeriodSensor(SensorEntity):
+    def __init__(self, coordinator):
+        self.coordinator = coordinator
+
+    @property
+    def name(self):
+        return "Energy period"
+
+    @property
+    def state(self):
+        now = datetime.now()
+        return get_period(
+            now,
+            self.coordinator.config,
+            self.coordinator.is_today_holiday()
+        )
