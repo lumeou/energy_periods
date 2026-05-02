@@ -14,7 +14,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class EnergyPeriodSensor(SensorEntity):
-    def __init__(self, coordinator):
+    def __init__(self, coordinator, entry_id):
         self.coordinator = coordinator
         self._attr_unique_id = f"{entry_id}_energy_period"
 
