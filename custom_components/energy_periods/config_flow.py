@@ -36,7 +36,11 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         return self.async_show_menu(
             step_id="init",
-            menu_options=["workday", "holiday", "save"]
+            menu_options={
+                "workday": "Workday",
+                "holiday": "Holiday",
+                "save": "Save"
+            }
         )
 
     async def async_step_workday(self, user_input=None):
@@ -48,11 +52,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         schema = vol.Schema({
             vol.Required("start"): selector.TimeSelector(),
             vol.Required("end"): selector.TimeSelector(),
-            vol.Required("period"): selector.TextSelector(
-                selector.TextSelectorConfig(
-                    placeholder="ej: punta, llano, valle..."
-                )
-            ),
+            vol.Required("period"): selector.TextSelector(),
         })
 
         return self.async_show_form(
@@ -87,11 +87,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         schema = vol.Schema({
             vol.Required("start", default="00:00"): selector.TimeSelector(),
             vol.Required("end", default="24:00"): selector.TimeSelector(),
-            vol.Required("period", default="valle"): selector.TextSelector(
-                selector.TextSelectorConfig(
-                    placeholder="ej: punta, llano, valle..."
-                )
-            ),
+            vol.Required("period", default="valle"): selector.TextSelector(),
         })
 
         return self.async_show_form(
