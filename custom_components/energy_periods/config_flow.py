@@ -2,6 +2,9 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
+
+from .const import DEFAULT_CONFIG
+
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -14,7 +17,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             return self.async_create_entry(
                 title="Energy Periods",
-                data={"sources": [user_input]}
+                data={"sources": [user_input]},
+                options={
+                    "periods": DEFAULT_CONFIG
+                }
             )
 
         schema = vol.Schema({
