@@ -34,3 +34,5 @@ class BaseHolidayProvider(ABC):
             }
         """
         pass
+
+from . import ics  # noqa
