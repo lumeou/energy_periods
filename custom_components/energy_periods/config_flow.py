@@ -45,9 +45,13 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             return await self.async_step_workday_add_more()
 
         schema = vol.Schema({
-            vol.Required("start"): str,
-            vol.Required("end"): str,
-            vol.Required("period"): str,
+            vol.Required("start"): selector.TimeSelector(),
+            vol.Required("end"): selector.TimeSelector(),
+            vol.Required("period"): selector.TextSelector(
+                selector.TextSelectorConfig(
+                    placeholder="ej: punta, llano, valle..."
+                )
+            ),
         })
 
         return self.async_show_form(
@@ -80,9 +84,13 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             return await self.async_step_holiday_add_more()
 
         schema = vol.Schema({
-            vol.Required("start", default="00:00"): str,
-            vol.Required("end", default="24:00"): str,
-            vol.Required("period", default="valle"): str,
+            vol.Required("start", default="00:00"): selector.TimeSelector(),
+            vol.Required("end", default="24:00"): selector.TimeSelector(),
+            vol.Required("period", default="valle"): selector.TextSelector(
+                selector.TextSelectorConfig(
+                    placeholder="ej: punta, llano, valle..."
+                )
+            ),
         })
 
         return self.async_show_form(
