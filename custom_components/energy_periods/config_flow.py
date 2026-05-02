@@ -61,8 +61,8 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_working_day(self, user_input=None):
         self._current_day_type = "working_day"
-        #return await self.async_step_editor()
-        return await self._show_periods_list()
+        return await self.async_step_editor()
+        #return await self._show_periods_list()
 
     # ----------------------------------------------------
     # ENTRADA NON WORKING DAY
@@ -70,13 +70,13 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_non_working_day(self, user_input=None):
         self._current_day_type = "non_working_day"
-        #return await self.async_step_editor()
-        return await self._show_periods_list()
+        return await self.async_step_editor()
+        #return await self._show_periods_list()
 
     # ----------------------------------------------------
     # EDITOR
     # ----------------------------------------------------
-
+"""
     async def _show_periods_list(self):
 
         day_type = self._current_day_type
@@ -117,6 +117,60 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_menu(
             step_id="editor",
             menu_options=menu
+        )
+"""
+    async def async_step_editor(self, user_input=None):
+    
+        periods = self.periods.setdefault(self._current_day_type, [])
+    
+        # procesar acción
+        if user_input is not None:
+            action = user_input["action"]
+    
+            if action == "add":
+                return await self.async_step_add()
+    
+            if action == "edit":
+                return await self.async_step_edit()
+    
+            if action == "delete":
+                return await self.async_step_delete()
+    
+            if action == "back":
+                return await self.async_step_init()
+    
+            if action == "save":
+                return await self.async_step_save()
+    
+        # construir lista visible
+        if periods:
+            text = "\n".join(
+                f"{p['start']} → {p['end']} ({p['type']})"
+                for p in periods
+            )
+        else:
+            text = "No periods defined"
+    
+        schema = vol.Schema({
+            vol.Required("action"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=[
+                        {"value": "add", "label": "➕ Add"},
+                        {"value": "edit", "label": "✏️ Edit"},
+                        {"value": "delete", "label": "🗑 Delete"},
+                        {"value": "back", "label": "⬅ Back"},
+                        {"value": "save", "label": "💾 Save"},
+                    ]
+                )
+            )
+        })
+    
+        return self.async_show_form(
+            step_id="editor",
+            data_schema=schema,
+            description_placeholders={
+                "periods": text
+            }
         )
 
     async def async_step_add(self, user_input=None):
