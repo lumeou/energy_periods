@@ -1,0 +1,77 @@
+{
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "working_day": "🗓️ Día laborable",
+          "non_working_day": "🌙 Día no laborable",
+          "save": "💾 Guardar"
+        }
+      },
+      "editor": {
+        "description": "Tramos actuales:\n\n{periods}",
+        "data": {
+          "action": "Acción"
+        },
+        "data_description": {
+          "action": "Elige qué quieres hacer"
+        }
+      },
+      "add": {
+        "title": "Añadir tramo",
+        "data": {
+          "start": "Hora de inicio",
+          "end": "Hora de fin",
+          "type": "Tipo"
+        },
+        "data_description": {
+          "type": "Introduce el tipo de tramo, por ejemplo: punta, llano o valle"
+        }
+      },
+      "edit": {
+        "title": "Editar",
+        "data": {
+          "index": "Período"
+        }
+      },
+      "edit_form": {
+        "title": "Editar período",
+        "data": {
+          "start": "Hora de inicio",
+          "end": "Hora de fin",
+          "type": "Tipo"
+        }
+      },
+      "delete": {
+        "title": "Eliminar período",
+        "data": {
+          "index": "Período"
+        }
+      },
+      "fallback": {
+        "title": "Período por defecto",
+        "data": {
+          "type": "Tipo"
+        },
+        "data_description": {
+          "type": "Introduce el tipo que se asumirá para los tramos que no tengan una asignación específica, por ejemplo: punta, llano o valle"
+        }
+      }
+    },
+    "error": {
+        "overlap": "Los tramos no pueden solaparse"
+    }
+  },
+  "selector": {
+    "action": {
+      "options": {
+        "add":      "➕ Añadir",
+        "edit":     "✏️ Editar",
+        "delete":   "🗑 Eliminar",
+        "fallback": "⚙️ Período alternativo",
+        "back":     "⬅ Volver",
+        "save":     "💾 Guardar"
+      }
+    }
+  }
+}

@@ -1,12 +1,77 @@
 {
   "options": {
     "step": {
-      "editor": {
-        "title": "Edit periods",
-        "description": "Current periods:\n\n{periods}",
-        "errors": {
-          "overlap": "Periods cannot overlap"
+      "init": {
+        "title": "Energy periods",
+        "menu_options": {
+          "working_day": "🗓️ Working day",
+          "non_working_day": "🌙 Non-working day",
+          "save": "💾 Save"
         }
+      },
+      "editor": {
+        "description": "Current periods:\n\n{periods}",
+        "data": {
+          "action": "Action"
+        },
+        "data_description": {
+          "action": "Choose what you want to do"
+        }
+      },
+      "add": {
+        "title": "Add period",
+        "data": {
+          "start": "Start time",
+          "end": "End time",
+          "type": "Type"
+        },
+        "data_description": {
+          "type": "Enter the type of period, for example: peak, flat o valley"
+        }
+      },
+      "edit": {
+        "title": "Select period to edit",
+        "data": {
+          "index": "Period"
+        }
+      },
+      "edit_form": {
+        "title": "Edit period",
+        "data": {
+          "start": "Start time",
+          "end": "End time",
+          "type": "Type"
+        }
+      },
+      "delete": {
+        "title": "Delete period",
+        "data": {
+          "index": "Period"
+        }
+      },
+      "fallback": {
+        "title": "Fallback period",
+        "data": {
+          "type": "Type"
+        },
+        "data_description": {
+          "type": "Enter the type to be applied to periods that do not have a specific assignment, for example: peak, flat o valley"
+        }
+      }
+    },
+    "error": {
+      "overlap": "Periods cannot overlap"
+    }
+  },
+  "selector": {
+    "action": {
+      "options": {
+          "add":      "➕ Add",
+          "edit":     "✏️ Edit",
+          "delete":   "🗑 Delete",
+          "fallback": "⚙️ Fallback",
+          "back":     "⬅ Back",
+          "save":     "💾 Save"
       }
     }
   }

@@ -63,11 +63,11 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         return self.async_show_menu(
             step_id="init",
-            menu_options={
-                "working_day": "🗓️ Working day",
-                "non_working_day": "🌙 Non-working day",
-                "save": "💾 Save"
-            }
+            menu_options=[
+                "working_day",
+                "non_working_day",
+                "save"
+            ]
         )
 
     # ----------------------------------------------------
@@ -128,14 +128,8 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         schema = vol.Schema({
             vol.Required("action"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    options=[
-                        {"value": "add", "label": "➕ Add"},
-                        {"value": "edit", "label": "✏️ Edit"},
-                        {"value": "delete", "label": "🗑 Delete"},
-                        {"value": "fallback", "label": "⚙️ Fallback"},
-                        {"value": "back", "label": "⬅ Back"},
-                        {"value": "save", "label": "💾 Save"},
-                    ]
+                    options=["add", "edit", "delete", "fallback", "back", "save"],
+                    translation_key="action"
                 )
             )
         })
