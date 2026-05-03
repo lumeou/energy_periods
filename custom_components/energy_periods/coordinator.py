@@ -64,24 +64,11 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
     def get_raw_holidays(self):
         return self.data
 
-    
-    # def get_day_type(self):
-    #     return "non_working_day" if self.is_non_working_day() else "working_day"
 
-    # def get_periods_for_today(self):
-    #     day_type = self.get_day_type()
-    #     return self.get_periods().get(day_type, [])
-        
-    # def get_fallback(self):
-    #     return self.get_periods().get("fallback", {"type": "unknown"})
+    def get_prices(self):
+        return self.entry.options.get("prices", {})
 
-    # def get_current_type(self, now):
-    #     periods = self.get_periods_for_today()
-    
-    #     for p in periods:
-    #         if p["start"] <= now < p["end"]:
-    #             return p["type"]
-    
-    #     return self.get_fallback()["type"]
-
-
+    def get_current_price(self):
+        period_type = self.get_current_period();
+        prices = self.get_prices()
+        return prices.get(period_type, 0.0)

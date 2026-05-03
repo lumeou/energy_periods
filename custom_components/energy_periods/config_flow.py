@@ -27,9 +27,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         "tag": user_input["tag"]
                     }]
                 },
-                options={
-                    "periods": copy.deepcopy(DEFAULT_CONFIG)
-                }
+                options=copy.deepcopy(DEFAULT_CONFIG)
             )
 
         schema = vol.Schema({
