@@ -3,6 +3,10 @@ from homeassistant.components.sensor import SensorEntity
 from .tariff_engine import get_period
 from .const import DOMAIN
 
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -27,7 +31,9 @@ class EnergyPeriodSensor(SensorEntity):
     
     @property
     def state(self):
-        return self.coordinator.get_current_period()
+        value = self.coordinator.get_current_period()
+        _LOGGER.debug("Energy period recalculated: %s", value)  
+        return value
     
     async def async_update(self):
         # fuerza refresco del coordinator
