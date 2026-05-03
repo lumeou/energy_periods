@@ -1,7 +1,12 @@
 from datetime import datetime
 
 def parse_time(value):
-    return datetime.strptime(value, "%H:%M:%S").time()
+    for fmt in ("%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(value, fmt).time()
+        except ValueError:
+            continue
+    raise ValueError(f"Invalid time format: {value}")
 
 def get_period(now, config, is_holiday):
     day_type = "non_working_day" if is_holiday else "working_day"
