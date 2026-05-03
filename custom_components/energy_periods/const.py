@@ -11,5 +11,8 @@ DEFAULT_CONFIG = {
     ],
     "non_working_day": [
         {"start": "00:00", "end": "00:00", "type": "valle"}
-    ]
+    ],
+    "fallback": {
+        "type": "valle"
+    }
 }

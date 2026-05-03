@@ -8,9 +8,9 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry):
     sources = entry.data.get("sources", [])
-    config = entry.options["periods"]
+    periods = entry.options["periods"]
 
-    _LOGGER.debug("Config: %s", config)
+    _LOGGER.debug("Periods: %s", periods)
 
     providers = []
 
@@ -24,7 +24,7 @@ async def async_setup_entry(hass, entry):
         )
         providers.append(provider)
 
-    coordinator = EnergyPeriodsCoordinator(hass, providers, config)
+    coordinator = EnergyPeriodsCoordinator(hass, providers, periods)
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})

@@ -6,21 +6,23 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_entities([
-        WeekendBinarySensor(coordinator, entry.entry_id),
-        HolidayBinarySensor(coordinator, entry.entry_id),
-        NonWorkingDayBinarySensor(coordinator, entry.entry_id),
+        WeekendBinarySensor(coordinator, entry.entry),
+        HolidayBinarySensor(coordinator, entry.entry),
+        NonWorkingDayBinarySensor(coordinator, entry.entry),
     ])
 
 
 class WeekendBinarySensor(BinarySensorEntity):
 
-    def __init__(self, coordinator, entry_id):
+    def __init__(self, coordinator, entry):
         self.coordinator = coordinator
-        self._attr_unique_id = f"{entry_id}_weekend"
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_weekend"
+        self._attr_name = f"{entry.title} Is Weekend"
 
     @property
     def name(self):
-        return "Is weekend"
+        return self._attr_name
 
     @property
     def icon(self):
@@ -33,13 +35,15 @@ class WeekendBinarySensor(BinarySensorEntity):
 
 class HolidayBinarySensor(BinarySensorEntity):
 
-    def __init__(self, coordinator, entry_id):
+    def __init__(self, coordinator, entry):
         self.coordinator = coordinator
-        self._attr_unique_id = f"{entry_id}_holiday"
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_holiday"
+        self._attr_name = f"{entry.title} Is Holiday"
 
     @property
     def name(self):
-        return "Is public holiday"
+        return self._attr_name
 
     @property
     def icon(self):
@@ -52,13 +56,15 @@ class HolidayBinarySensor(BinarySensorEntity):
 
 class NonWorkingDayBinarySensor(BinarySensorEntity):
 
-    def __init__(self, coordinator, entry_id):
+    def __init__(self, coordinator, entry):
         self.coordinator = coordinator
-        self._attr_unique_id = f"{entry_id}_non_working_day"
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_non_working_day"
+        self._attr_name = f"{entry.title} Is Holiday"
 
     @property
     def name(self):
-        return "Is non-working day"
+        return self._attr_name
 
     @property
     def icon(self):

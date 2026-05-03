@@ -16,8 +16,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         if user_input is not None:
             return self.async_create_entry(
-                title="Energy Periods",
-                data={"sources": [user_input]},
+                title=user_input["name"],
+                data={
+                    "name": user_input["name"],
+                    "sources": [{
+                        "type": "ics",
+                        "source": user_input["source"],
+                        "tag": user_input["tag"]
+                    }]
+                },
                 options={
                     "periods": DEFAULT_CONFIG
                 }

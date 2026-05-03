@@ -12,18 +12,23 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_entities([
-        EnergyPeriodSensor(coordinator, entry.entry_id)
+        EnergyPeriodSensor(coordinator, entry)
     ])
 
 
 class EnergyPeriodSensor(SensorEntity):
-    def __init__(self, coordinator, entry_id):
+
+    def __init__(self, coordinator, entry):
         self.coordinator = coordinator
-        self._attr_unique_id = f"{entry_id}_energy_period"
+
+        self._entry = entry
+
+        self._attr_unique_id = f"{entry.entry_id}_energy_period"
+        self._attr_name = f"{entry.title} Energy Period"
 
     @property
     def name(self):
-        return "Energy period"
+        return self._attr_name
 
     @property
     def icon(self):
@@ -34,8 +39,4 @@ class EnergyPeriodSensor(SensorEntity):
         value = self.coordinator.get_current_period()
         _LOGGER.debug("Energy period recalculated: %s", value)  
         return value
-    
-    async def async_update(self):
-        # fuerza refresco del coordinator
-        await self.coordinator.async_request_refresh()
 

@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
-    def __init__(self, hass, providers, config):
+    def __init__(self, hass, providers, periods):
         super().__init__(
             hass,
             logger=_LOGGER,
@@ -20,7 +20,7 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=30),
         )
         self.providers = providers
-        self.config = config
+        self.periods = periods
 
     async def _async_update_data(self):
         merged = {}
@@ -40,7 +40,7 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         now = dt_util.now()
         is_non_working_day = self.is_non_working_day()
 
-        return get_period(now, self.config, is_non_working_day)
+        return get_period(now, self.periods, is_non_working_day)
 
 
     def is_public_holiday(self):
@@ -66,10 +66,10 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
     def get_periods_for_today(self):
         day_type = self.get_day_type()
-        return self.config.get("periods", {}).get(day_type, [])
+        return self.periods.get(day_type, [])
         
     def get_fallback(self):
-        return self.config.get("periods", {}).get("fallback", {"type": "unknown"})
+        return self.periods.get("fallback", {"type": "unknown"})
 
     def validate_periods(periods):
         sorted_periods = sorted(periods, key=lambda x: x["start"])

@@ -19,12 +19,12 @@ def in_range(current, start, end):
         # cruza medianoche
         return current >= start or current < end
     
-def get_period(now, config, is_holiday):
+def get_period(now, periods, is_holiday):
     day_type = "non_working_day" if is_holiday else "working_day"
 
     current = now.hour * 3600 + now.minute * 60 + now.second
 
-    for block in config.get(day_type, []):
+    for block in periods.get(day_type, []):
         start = parse_to_seconds(block["start"])
         end = parse_to_seconds(block["end"])
 
