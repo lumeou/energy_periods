@@ -49,6 +49,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         # estado persistente del editor
         self.periods = copy.deepcopy(config_entry.options.get("periods", {}))
+        self.prices = copy.deepcopy(config_entry.options.get("prices", {}))
         self._current_day_type = None
 
         _LOGGER.debug("Periods: %s", self.periods)
@@ -380,6 +381,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return self.async_create_entry(
             title="Energy Periods",
             data={
-                "periods": copy.deepcopy(self.periods)
+                "periods": copy.deepcopy(self.periods),
+                "prices": copy.deepcopy(self.prices)
             }
         )
