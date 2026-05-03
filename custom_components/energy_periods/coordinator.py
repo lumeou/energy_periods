@@ -1,5 +1,8 @@
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
+
+from .tariff_engine import get_period
+
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -12,7 +15,7 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
             hass,
             logger=_LOGGER,
             name="energy_periods",
-            update_interval=timedelta(hours=12),
+            update_interval=timedelta(seconds=30),
         )
         self.providers = providers
         self.config = config
@@ -30,6 +33,13 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         _LOGGER.debug("Merged holidays: %s", merged)
         
         return merged
+    
+    def get_current_period(self):
+        now = datetime.now()
+        is_non_working_day = self.is_non_working_day()
+
+        return get_period(now, self.config, is_non_working_day)
+
 
     def is_public_holiday(self):
         if not self.data:

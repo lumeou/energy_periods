@@ -1,5 +1,4 @@
 from homeassistant.components.sensor import SensorEntity
-from datetime import datetime
 
 from .tariff_engine import get_period
 from .const import DOMAIN
@@ -28,9 +27,9 @@ class EnergyPeriodSensor(SensorEntity):
     
     @property
     def state(self):
-        now = datetime.now()
-        return get_period(
-            now,
-            self.coordinator.config,
-            self.coordinator.is_non_working_day()
-        )
+        return self.coordinator.get_current_period()
+    
+    async def async_update(self):
+        # fuerza refresco del coordinator
+        await self.coordinator.async_request_refresh()
+
