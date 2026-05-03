@@ -7,6 +7,7 @@ from homeassistant.helpers import selector
 import voluptuous as vol
 
 from .const import DEFAULT_CONFIG
+from .tariff_engine import validate_periods
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,9 +64,9 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_menu(
             step_id="init",
             menu_options={
-                "working_day": "Working day",
-                "non_working_day": "Non-working day",
-                "save": "Save"
+                "working_day": "🗓️ Working day",
+                "non_working_day": "🌙 Non-working day",
+                "save": "💾 Save"
             }
         )
 
@@ -89,7 +90,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     # EDITOR
     # ----------------------------------------------------
 
-    async def async_step_editor(self, user_input=None):
+    async def async_step_editor(self, user_input=None, errors=None):
     
         periods = self.periods[self._current_day_type]
     
@@ -105,6 +106,9 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     
             if action == "delete":
                 return await self.async_step_delete()
+            
+            if action == "fallback":
+                return await self.async_step_fallback()
     
             if action == "back":
                 return await self.async_step_init()
@@ -128,6 +132,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
                         {"value": "add", "label": "➕ Add"},
                         {"value": "edit", "label": "✏️ Edit"},
                         {"value": "delete", "label": "🗑 Delete"},
+                        {"value": "fallback", "label": "⚙️ Fallback"},
                         {"value": "back", "label": "⬅ Back"},
                         {"value": "save", "label": "💾 Save"},
                     ]
@@ -138,6 +143,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="editor",
             data_schema=schema,
+            errors=errors or {},
             description_placeholders={
                 "periods": text
             }
@@ -234,15 +240,37 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
                 )
             })
         )
+    
+    async def async_step_fallback(self, user_input=None):
+
+        current = self.periods.get("fallback", {}).get("type", "")
+
+        if user_input is not None:
+            self.periods["fallback"] = {
+                "type": user_input["type"]
+            }
+            return await self.async_step_editor()
+
+        return self.async_show_form(
+            step_id="fallback",
+            data_schema=vol.Schema({
+                vol.Required("type", default=current): selector.TextSelector()
+            })
+        )
 
     async def async_step_back(self, user_input=None):
         return await self.async_step_init()
 
-    # ----------------------------------------------------
-    # SAVE FINAL
-    # ----------------------------------------------------
-
     async def async_step_save(self, user_input=None):
+
+        try:
+            for day_type in ["working_day", "non_working_day"]:
+                validate_periods(self.periods.get(day_type, []))
+
+        except ValueError:
+            return await self.async_step_editor(
+                errors={"base": "overlap"}
+            )
 
         return self.async_create_entry(
             title="Energy Periods",

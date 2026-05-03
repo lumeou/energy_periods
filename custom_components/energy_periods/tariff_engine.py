@@ -31,4 +31,20 @@ def get_period(now, periods, is_holiday):
         if in_range(current, start, end):
             return block["type"]
 
-    return None
+    fallback = periods.get("fallback", {}).get("type")
+    return fallback if fallback else "unknown"
+
+def validate_periods(periods):
+
+    sorted_periods = sorted(periods, key=lambda x: parse_to_seconds(x["start"]))
+
+    for i in range(len(sorted_periods) - 1):
+        end = parse_to_seconds(sorted_periods[i]["end"])
+        next_start = parse_to_seconds(sorted_periods[i + 1]["start"])
+
+        if end > next_start:
+            raise ValueError(
+                f"Overlap: {sorted_periods[i]} with {sorted_periods[i+1]}"
+            )
+
+    return True

@@ -65,30 +65,23 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         return self.data
 
     
-    def get_day_type(self):
-        return "non_working_day" if self.is_non_working_day() else "working_day"
+    # def get_day_type(self):
+    #     return "non_working_day" if self.is_non_working_day() else "working_day"
 
-    def get_periods_for_today(self):
-        day_type = self.get_day_type()
-        return self.get_periods().get(day_type, [])
+    # def get_periods_for_today(self):
+    #     day_type = self.get_day_type()
+    #     return self.get_periods().get(day_type, [])
         
-    def get_fallback(self):
-        return self.get_periods().get("fallback", {"type": "unknown"})
+    # def get_fallback(self):
+    #     return self.get_periods().get("fallback", {"type": "unknown"})
 
-    def validate_periods(periods):
-        sorted_periods = sorted(periods, key=lambda x: x["start"])
+    # def get_current_type(self, now):
+    #     periods = self.get_periods_for_today()
     
-        for i in range(len(sorted_periods) - 1):
-            if sorted_periods[i]["end"] > sorted_periods[i + 1]["start"]:
-                raise ValueError("Overlapping periods detected")
+    #     for p in periods:
+    #         if p["start"] <= now < p["end"]:
+    #             return p["type"]
     
-        return True
+    #     return self.get_fallback()["type"]
 
-    def get_current_type(self, now):
-        periods = self.get_periods_for_today()
-    
-        for p in periods:
-            if p["start"] <= now < p["end"]:
-                return p["type"]
-    
-        return self.get_fallback()["type"]
+

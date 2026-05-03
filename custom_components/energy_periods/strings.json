@@ -2,7 +2,10 @@
   "options": {
     "step": {
       "editor": {
-        "description": "Current periods:\n\n{periods}"
+        "description": "xxxCurrent periods:\n\n{periods}",
+        "errors": {
+          "overlap": "Periods cannot overlap"
+        }
       }
     }
   }
