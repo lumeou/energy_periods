@@ -1,15 +1,20 @@
-def get_period(now, config, is_non_working_day):
-    day_type = "non_working_day" if is_non_working_day else "working_day"
+from datetime import datetime
+
+def parse_time(value):
+    return datetime.strptime(value, "%H:%M:%S").time()
+
+def get_period(now, config, is_holiday):
+    day_type = "non_working_day" if is_holiday else "working_day"
     minutes = now.hour * 60 + now.minute
 
     for block in config.get(day_type, []):
-        sh, sm = map(int, block["start"].split(":"))
-        eh, em = map(int, block["end"].split(":"))
+        start_t = parse_time(block["start"])
+        end_t = parse_time(block["end"])
 
-        start = sh * 60 + sm
-        end = eh * 60 + em
+        start = start_t.hour * 60 + start_t.minute
+        end = end_t.hour * 60 + end_t.minute
 
         if start <= minutes < end:
             return block["type"]
 
-    return "unknown"
+    return None
