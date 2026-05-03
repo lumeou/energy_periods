@@ -1,7 +1,26 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuración de la entrada",
+        "description": "Permite definir una tarifa variable sobre tramos horarios.\n\nPor ahora únicamente se permite definir un origen de datos ICS que debería contener todos los días festivos.",
+        "data": {
+          "name": "Nombre",
+          "source": "Origen de datos de festivos",
+          "tag": "Etiqueta para los festivos"
+        },
+        "data_description": {
+          "name": "Nombre de la entrada",
+          "source": "Dirección HTTP a un recurso de datos ICS que defina festivos",
+          "tag": "Etiqueta para los festivos, por ejemplo: nacional"
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
+        "title": "Opciones de la entrada",
         "menu_options": {
           "working_day": "🗓️ Día laborable",
           "non_working_day": "🌙 Día no laborable",

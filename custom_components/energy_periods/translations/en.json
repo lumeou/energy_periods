@@ -1,8 +1,26 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "title": "Entry configuration",
+        "description": "Permite definir una tarifa variable sobre tramos horarios.\n\nPor ahora únicamente se permite definir un origen de datos ICS que debería contener todos los días festivos.",
+        "data": {
+          "name": "Name",
+          "source": "Source of public holiday data",
+          "tag": "Tag for public holidays"
+        },
+        "data_description": {
+          "name": "Entry name",
+          "source": "HTTP address of an ICS data resource defining public holidays",
+          "tag": "Tag for public holidays, for example: national"
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
-        "title": "Energy periods",
+        "title": "Entry options",
         "menu_options": {
           "working_day": "🗓️ Working day",
           "non_working_day": "🌙 Non-working day",
