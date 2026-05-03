@@ -5,6 +5,7 @@ from homeassistant.helpers import selector
 
 from .const import DEFAULT_CONFIG
 
+import copy
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     }]
                 },
                 options={
-                    "periods": DEFAULT_CONFIG
+                    "periods": copy.deepcopy(DEFAULT_CONFIG)
                 }
             )
 
