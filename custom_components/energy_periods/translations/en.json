@@ -60,7 +60,8 @@
       }
     },
     "error": {
-      "overlap": "Periods cannot overlap"
+      "overlap": "Periods cannot overlap",
+      "required": "El campo es requerido"
     }
   },
   "selector": {

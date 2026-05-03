@@ -22,7 +22,8 @@
         "data": {
           "start": "Hora de inicio",
           "end": "Hora de fin",
-          "type": "Tipo"
+          "type": "Tipo",
+          "action": "Acción"
         },
         "data_description": {
           "type": "Introduce el tipo de tramo, por ejemplo: punta, llano o valle"
@@ -39,7 +40,8 @@
         "data": {
           "start": "Hora de inicio",
           "end": "Hora de fin",
-          "type": "Tipo"
+          "type": "Tipo",
+          "action": "Acción"
         }
       },
       "delete": {
@@ -51,7 +53,8 @@
       "fallback": {
         "title": "Período por defecto",
         "data": {
-          "type": "Tipo"
+          "type": "Tipo",
+          "action": "Acción"
         },
         "data_description": {
           "type": "Introduce el tipo que se asumirá para los tramos que no tengan una asignación específica, por ejemplo: punta, llano o valle"
@@ -59,7 +62,8 @@
       }
     },
     "error": {
-        "overlap": "Los tramos no pueden solaparse"
+        "overlap": "Los tramos no pueden solaparse",
+        "required": "El campo es requerido"
     }
   },
   "selector": {
