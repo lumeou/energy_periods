@@ -6,9 +6,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_entities([
-        WeekendBinarySensor(coordinator, entry.entry),
-        HolidayBinarySensor(coordinator, entry.entry),
-        NonWorkingDayBinarySensor(coordinator, entry.entry),
+        WeekendBinarySensor(coordinator, entry),
+        HolidayBinarySensor(coordinator, entry),
+        NonWorkingDayBinarySensor(coordinator, entry),
     ])
 
 
@@ -60,7 +60,7 @@ class NonWorkingDayBinarySensor(BinarySensorEntity):
         self.coordinator = coordinator
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_non_working_day"
-        self._attr_name = f"{entry.title} Is Holiday"
+        self._attr_name = f"{entry.title} Is Non Working Day"
 
     @property
     def name(self):
