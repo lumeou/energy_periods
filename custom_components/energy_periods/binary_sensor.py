@@ -1,4 +1,5 @@
 from homeassistant.components.binary_sensor import BinarySensorEntity
+
 from .const import DOMAIN
 
 

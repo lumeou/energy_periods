@@ -1,18 +1,19 @@
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.util import dt as dt_util
+import logging
 
 from datetime import timedelta
 
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
+
 from .tariff_engine import get_period
 
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
-    def __init__(self, hass, providers, periods):
+    def __init__(self, hass, providers, entry):
         super().__init__(
             hass,
             logger=_LOGGER,
@@ -20,7 +21,7 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=30),
         )
         self.providers = providers
-        self.periods = periods
+        self.entry = entry
 
     async def _async_update_data(self):
         merged = {}
@@ -36,11 +37,14 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         
         return merged
     
+    def get_periods(self):
+        return self.entry.options.get("periods", {})
+
     def get_current_period(self):
         now = dt_util.now()
         is_non_working_day = self.is_non_working_day()
 
-        return get_period(now, self.periods, is_non_working_day)
+        return get_period(now, self.get_periods(), is_non_working_day)
 
 
     def is_public_holiday(self):
@@ -66,10 +70,10 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
     def get_periods_for_today(self):
         day_type = self.get_day_type()
-        return self.periods.get(day_type, [])
+        return self.get_periods().get(day_type, [])
         
     def get_fallback(self):
-        return self.periods.get("fallback", {"type": "unknown"})
+        return self.get_periods().get("fallback", {"type": "unknown"})
 
     def validate_periods(periods):
         sorted_periods = sorted(periods, key=lambda x: x["start"])

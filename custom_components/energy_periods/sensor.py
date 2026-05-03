@@ -1,9 +1,9 @@
+import logging
+
 from homeassistant.components.sensor import SensorEntity
 
 from .tariff_engine import get_period
 from .const import DOMAIN
-
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 

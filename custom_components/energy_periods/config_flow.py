@@ -1,12 +1,12 @@
-import voluptuous as vol
+import copy
+import logging
+
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
+import voluptuous as vol
 
 from .const import DEFAULT_CONFIG
-
-import copy
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
         # estado persistente del editor
-        self.periods = dict(config_entry.options["periods"])
+        self.periods = copy.deepcopy(config_entry.options.get("periods", {}))
         self._current_day_type = None
 
         _LOGGER.debug("Periods: %s", self.periods)
@@ -76,7 +76,6 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_working_day(self, user_input=None):
         self._current_day_type = "working_day"
         return await self.async_step_editor()
-        #return await self._show_periods_list()
 
     # ----------------------------------------------------
     # ENTRADA NON WORKING DAY
@@ -85,7 +84,6 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_non_working_day(self, user_input=None):
         self._current_day_type = "non_working_day"
         return await self.async_step_editor()
-        #return await self._show_periods_list()
 
     # ----------------------------------------------------
     # EDITOR
@@ -249,7 +247,6 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return self.async_create_entry(
             title="Energy Periods",
             data={
-                "periods": self.periods
+                "periods": copy.deepcopy(self.periods)
             }
         )
-  
