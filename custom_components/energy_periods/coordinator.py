@@ -1,5 +1,7 @@
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from datetime import timedelta, date, datetime
+from homeassistant.util import dt as dt_util
+
+from datetime import timedelta
 
 from .tariff_engine import get_period
 
@@ -35,7 +37,7 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         return merged
     
     def get_current_period(self):
-        now = datetime.now()
+        now = dt_util.now()
         is_non_working_day = self.is_non_working_day()
 
         return get_period(now, self.config, is_non_working_day)
@@ -45,11 +47,11 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         if not self.data:
             return False
     
-        today = date.today().isoformat()
+        today = dt_util.now().date().isoformat()
         return today in self.data
     
     def is_weekend(self):
-        return date.today().weekday() >= 5
+        return dt_util.now().weekday() >= 5
 
     def is_non_working_day(self):
         return self.is_weekend() or self.is_public_holiday()
