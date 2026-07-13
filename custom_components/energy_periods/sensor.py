@@ -36,7 +36,7 @@ class EnergyPeriodSensor(SensorEntity):
         return "mdi:clock-time-four"
     
     @property
-    def state(self):
+    def native_value(self):
         return self.coordinator.get_current_period()
 
 
@@ -59,7 +59,7 @@ class EnergyPriceSensor(SensorEntity):
         return "mdi:hand-coin"
     
     @property
-    def state(self):
+    def native_value(self):
         return self.coordinator.get_current_price()
 
     @property
@@ -73,8 +73,5 @@ class EnergyPriceSensor(SensorEntity):
     @property
     def device_class(self):
         return None
-    
-    @property
-    def last_reset(self):
-        return None
+
     
