@@ -1,0 +1,31 @@
+rebuild_price_history:
+  name: Reconstruir histórico de precio
+  description: >-
+    Recalcula y escribe el histórico horario (long-term statistics) del
+    sensor de precio de una entrada de Energy Periods, desde una fecha dada.
+    Útil para ampliar el histórico ya existente o volver a generarlo tras un
+    cambio. No comprueba si el calendario de festivos configurado cubre esas
+    fechas: si el ICS no incluye años antiguos, esos días no se detectarán
+    como festivos.
+  fields:
+    config_entry_id:
+      name: Entrada
+      description: Entrada de configuración de Energy Periods a reconstruir.
+      required: true
+      selector:
+        config_entry:
+          integration: energy_periods
+    start_date:
+      name: Desde
+      description: Fecha (incluida) a partir de la cual reconstruir el histórico.
+      required: true
+      selector:
+        date:
+    end_date:
+      name: Hasta
+      description: >-
+        Fecha (incluida) hasta la que reconstruir. Si se omite, se reconstruye
+        hasta la última hora completa antes del momento actual.
+      required: false
+      selector:
+        date:

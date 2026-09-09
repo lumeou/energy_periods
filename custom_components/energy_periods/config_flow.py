@@ -4,6 +4,7 @@ import logging
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
+from homeassistant.util import dt as dt_util
 import voluptuous as vol
 
 from .const import DEFAULT_CONFIG
@@ -25,7 +26,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         "type": "ics",
                         "source": user_input["source"],
                         "tag": user_input["tag"]
-                    }]
+                    }],
+                    "backfill_from": user_input.get("backfill_from")
                 },
                 options=copy.deepcopy(DEFAULT_CONFIG)
             )
@@ -34,6 +36,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("name"): str,
             vol.Required("source"): str,
             vol.Required("tag"): str,
+            vol.Optional(
+                "backfill_from",
+                default=dt_util.now().date().isoformat()
+            ): selector.DateSelector(),
         })
 
         return self.async_show_form(step_id="user", data_schema=schema)

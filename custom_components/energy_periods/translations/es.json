@@ -7,12 +7,14 @@
         "data": {
           "name": "Nombre",
           "source": "Origen de datos de festivos",
-          "tag": "Etiqueta para los festivos"
+          "tag": "Etiqueta para los festivos",
+          "backfill_from": "Reconstruir histórico de precio desde"
         },
         "data_description": {
           "name": "Nombre de la entrada",
           "source": "Dirección HTTP a un recurso de datos ICS que defina festivos",
-          "tag": "Etiqueta para los festivos, por ejemplo: nacional"
+          "tag": "Etiqueta para los festivos, por ejemplo: nacional",
+          "backfill_from": "Fecha desde la que reconstruir el histórico horario del sensor de precio. Déjalo vacío para no reconstruir nada. Puedes volver a lanzarlo más adelante con el servicio energy_periods.rebuild_price_history"
         }
       }
     }

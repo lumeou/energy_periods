@@ -7,12 +7,14 @@
         "data": {
           "name": "Name",
           "source": "Source of public holiday data",
-          "tag": "Tag for public holidays"
+          "tag": "Tag for public holidays",
+          "backfill_from": "Rebuild price history from"
         },
         "data_description": {
           "name": "Entry name",
           "source": "HTTP address of an ICS data resource defining public holidays",
-          "tag": "Tag for public holidays, for example: national"
+          "tag": "Tag for public holidays, for example: national",
+          "backfill_from": "Date from which to rebuild the price sensor's hourly history. Leave empty to skip. You can run it again later with the energy_periods.rebuild_price_history service"
         }
       }
     }
