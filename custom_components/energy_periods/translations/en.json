@@ -26,6 +26,7 @@
         "menu_options": {
           "working_day": "🗓️ Working day",
           "non_working_day": "🌙 Non-working day",
+          "prices": "💰 Prices",
           "save": "💾 Save"
         }
       },
@@ -77,11 +78,33 @@
         "data_description": {
           "type": "Enter the type to be applied to periods that do not have a specific assignment, for example: peak, flat o valley"
         }
+      },
+      "prices_menu": {
+        "title": "Edit Prices",
+        "data": {
+          "price_type": "Period type",
+          "action": "Action"
+        },
+        "data_description": {
+          "price_type": "Select which period type to edit"
+        }
+      },
+      "edit_price": {
+        "title": "Edit Price",
+        "data": {
+          "price": "Price (€/kWh)",
+          "action": "Action"
+        },
+        "data_description": {
+          "price": "Enter the price for this period type"
+        }
       }
     },
     "error": {
       "overlap": "Periods cannot overlap",
-      "required": "El campo es requerido"
+      "required": "El campo es requerido",
+      "negative": "Price cannot be negative",
+      "invalid": "Invalid price value"
     }
   },
   "selector": {

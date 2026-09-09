@@ -26,6 +26,7 @@
         "menu_options": {
           "working_day": "🗓️ Día laborable",
           "non_working_day": "🌙 Día no laborable",
+          "prices": "💰 Precios",
           "save": "💾 Guardar"
         }
       },
@@ -80,11 +81,33 @@
         "data_description": {
           "type": "Introduce el tipo que se asumirá para los tramos que no tengan una asignación específica, por ejemplo: punta, llano o valle"
         }
+      },
+      "prices_menu": {
+        "title": "Editar Precios",
+        "data": {
+          "price_type": "Tipo de período",
+          "action": "Acción"
+        },
+        "data_description": {
+          "price_type": "Selecciona qué tipo de período quieres editar"
+        }
+      },
+      "edit_price": {
+        "title": "Editar Precio",
+        "data": {
+          "price": "Precio (€/kWh)",
+          "action": "Acción"
+        },
+        "data_description": {
+          "price": "Introduce el precio para este tipo de período"
+        }
       }
     },
     "error": {
         "overlap": "Los tramos no pueden solaparse",
-        "required": "El campo es requerido"
+        "required": "El campo es requerido",
+        "negative": "El precio no puede ser negativo",
+        "invalid": "Valor de precio inválido"
     }
   },
   "selector": {

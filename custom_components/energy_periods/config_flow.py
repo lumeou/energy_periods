@@ -57,6 +57,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         self.periods = copy.deepcopy(config_entry.options.get("periods", {}))
         self.prices = copy.deepcopy(config_entry.options.get("prices", {}))
         self._current_day_type = None
+        self._edit_price_type = None
 
         _LOGGER.debug("Periods: %s", self.periods)
 
@@ -71,6 +72,7 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
             menu_options=[
                 "working_day",
                 "non_working_day",
+                "prices",
                 "save"
             ]
         )
@@ -372,6 +374,85 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_back(self, user_input=None):
         return await self.async_step_init()
+
+    # Prices management
+
+    async def async_step_prices(self, user_input=None):
+        return await self.async_step_prices_menu()
+
+    async def async_step_prices_menu(self, user_input=None):
+        if user_input is not None:
+            if user_input["action"] == "back":
+                return await self.async_step_init()
+            if user_input["action"] == "edit":
+                self._edit_price_type = user_input["price_type"]
+                return await self.async_step_edit_price()
+        
+        price_types = set()
+        for day_type in ["working_day", "non_working_day"]:
+            for period in self.periods.get(day_type, []):
+                price_types.add(period["type"])
+        
+        options = [
+            {"value": pt, "label": f"{pt}: {self.prices.get(pt, 0.0):.6f}"}
+            for pt in sorted(price_types)
+        ]
+        
+        if not options:
+            return await self.async_step_init()
+        
+        return self.async_show_form(
+            step_id="prices_menu",
+            data_schema=vol.Schema({
+                vol.Required("price_type"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=options)
+                ),
+                vol.Required("action", default="edit"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=["back", "edit"],
+                        translation_key="action"
+                    )
+                )
+            })
+        )
+
+    async def async_step_edit_price(self, user_input=None):
+        errors = {}
+        price_type = self._edit_price_type
+        current_price = self.prices.get(price_type, 0.0)
+        
+        if user_input is not None:
+            if user_input["action"] == "back":
+                return await self.async_step_prices_menu()
+            
+            try:
+                price_value = float(user_input.get("price", current_price))
+                if price_value < 0:
+                    errors["price"] = "negative"
+                else:
+                    self.prices[price_type] = price_value
+                    return await self.async_step_prices_menu()
+            except (ValueError, TypeError):
+                errors["price"] = "invalid"
+        
+        return self.async_show_form(
+            step_id="edit_price",
+            data_schema=vol.Schema({
+                vol.Optional("price", default=current_price): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        step=0.001
+                    )
+                ),
+                vol.Required("action", default="save"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=["back", "save"],
+                        translation_key="action"
+                    )
+                )
+            }),
+            errors=errors
+        )
 
     async def async_step_save(self, user_input=None):
 
