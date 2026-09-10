@@ -24,11 +24,26 @@
       "init": {
         "title": "Opciones de la entrada",
         "menu_options": {
-          "working_day": "🗓️ Día laborable",
-          "non_working_day": "🌙 Día no laborable",
-          "prices": "💰 Precios",
+          "import_tariffs_config": "📋 Importar tarifas",
+          "export_tariffs_config": "📥 Ver o exportar Tarifas",
           "save": "💾 Guardar"
         }
+      },
+      "import_tariffs_config": {
+        "title": "Importar configuración de tarifas",
+        "description": "Establecer la configuración de tarifas.",
+        "data": {
+          "tariffs_json": "Configuración de tarifas",
+          "action": "Acción"
+        },
+        "data_description": {
+          "tariffs_json": "Pega tu configuración de tarifas como texto JSON.",
+          "action": "Elige qué quieres hacer"
+        }
+      },
+      "export_tariffs_config": {
+        "title": "Ver configuración de tarifas",
+        "description": "Aquí está tu configuración actual. Copia este JSON y guárdalo como `{filename}`:\n\n```\n{config}\n```"
       },
       "editor": {
         "description": "Tramos actuales:\n\n{periods}",
@@ -107,7 +122,12 @@
         "overlap": "Los tramos no pueden solaparse",
         "required": "El campo es requerido",
         "negative": "El precio no puede ser negativo",
-        "invalid": "Valor de precio inválido"
+        "invalid": "Valor de precio inválido",
+        "invalid_json": "Formato JSON inválido. Verifica la sintaxis del archivo.",
+        "invalid_config": "Estructura de configuración inválida. Comprueba que tenga 'tariffs' o 'periods'/'prices'.",
+        "file_not_found": "Archivo no encontrado. Asegúrate de que la ruta es correcta.",
+        "permission_denied": "Permiso denegado al leer el archivo. Comprueba los permisos del archivo.",
+        "unknown_error": "Error inesperado al cargar el archivo. Revisa los registros."
     }
   },
   "selector": {
@@ -118,7 +138,9 @@
         "delete":   "🗑 Eliminar",
         "fallback": "⚙️ Período alternativo",
         "back":     "⬅ Volver",
-        "save":     "💾 Guardar"
+        "save":     "💾 Guardar",
+        "accept":   "✅ Aceptar",
+        "cancel":   "❌ Cancelar"
       }
     }
   }

@@ -47,6 +47,49 @@ def _is_non_working_day(day: date, holidays: dict) -> bool:
     return bool(holidays) and day.isoformat() in holidays
 
 
+def _get_tariff_for_date(options: dict, target_date: date) -> dict | None:
+    """Obtiene el tariff vigente para la fecha dada."""
+    if "tariffs" not in options:
+        return None
+    
+    tariffs = options.get("tariffs", [])
+    
+    for tariff in tariffs:
+        from_date = tariff.get("from_date")
+        to_date = tariff.get("to_date")
+        
+        if isinstance(from_date, str):
+            from_date = dt_util.parse_date(from_date) if from_date else None
+        if isinstance(to_date, str):
+            to_date = dt_util.parse_date(to_date) if to_date else None
+        
+        if from_date is None or target_date >= from_date:
+            if to_date is None or target_date <= to_date:
+                return tariff
+    
+    # Fallback al primer tariff
+    if tariffs:
+        return tariffs[0]
+    
+    return None
+
+
+def _get_periods_for_date(options: dict, target_date: date) -> dict:
+    """Obtiene los periods vigentes para la fecha dada."""
+    tariff = _get_tariff_for_date(options, target_date)
+    if tariff:
+        return tariff.get("periods", {})
+    return options.get("periods", {})
+
+
+def _get_prices_for_date(options: dict, target_date: date) -> dict:
+    """Obtiene los prices vigentes para la fecha dada."""
+    tariff = _get_tariff_for_date(options, target_date)
+    if tariff:
+        return tariff.get("prices", {})
+    return options.get("prices", {})
+
+
 def _price_entity_id(hass, entry):
     """Localiza el entity_id real del sensor de precio de esta entrada."""
     ent_reg = er.async_get(hass)
@@ -77,9 +120,8 @@ async def async_backfill_price_history(
         )
         return 0
 
-    periods = coordinator.get_periods()
-    prices = coordinator.get_prices()
     holidays = coordinator.get_raw_holidays() or {}
+    options = entry.options
 
     start_utc = dt_util.as_utc(dt_util.start_of_local_day(start_date)).replace(
         minute=0, second=0, microsecond=0
@@ -109,6 +151,11 @@ async def async_backfill_price_history(
 
     while current < end_utc:
         local_dt = dt_util.as_local(current)
+        
+        # Obtener periods y prices para esta fecha
+        periods = _get_periods_for_date(options, local_dt.date())
+        prices = _get_prices_for_date(options, local_dt.date())
+        
         non_working = _is_non_working_day(local_dt.date(), holidays)
         period_type = get_period(local_dt, periods, non_working)
         price = prices.get(period_type, 0.0)

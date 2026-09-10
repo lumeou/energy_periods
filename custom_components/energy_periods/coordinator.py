@@ -1,6 +1,7 @@
 import logging
 
 from datetime import timedelta
+from datetime import date
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
@@ -37,8 +38,51 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
         
         return merged
     
+    def _get_active_tariff(self, target_date: date = None):
+        """Obtiene el tariff activo para la fecha dada (hoy si no se especifica).
+        
+        Si la configuración usa tariffs (nuevo formato), busca cuál está vigente.
+        Si usa el formato antiguo, retorna None para que los callers usen periods/prices directamente.
+        """
+        if target_date is None:
+            target_date = dt_util.now().date()
+        
+        options = self.entry.options
+        
+        # Si no estamos en formato tariffs, retornar None
+        if "tariffs" not in options:
+            return None
+        
+        tariffs = options.get("tariffs", [])
+        
+        for tariff in tariffs:
+            from_date = tariff.get("from_date")
+            to_date = tariff.get("to_date")
+            
+            # Convertir strings a date objects si es necesario
+            if isinstance(from_date, str):
+                from_date = dt_util.parse_date(from_date)
+            if isinstance(to_date, str):
+                to_date = dt_util.parse_date(to_date)
+            
+            # Verificar si target_date cae en este rango
+            if from_date is None or target_date >= from_date:
+                if to_date is None or target_date <= to_date:
+                    return tariff
+        
+        # Si no hay tariff vigente, usar el primero como fallback
+        if tariffs:
+            _LOGGER.warning("No active tariff for %s, using first tariff", target_date)
+            return tariffs[0]
+        
+        return None
+    
     def get_periods(self):
-        return self.entry.options.get("periods", {})
+        active_tariff = self._get_active_tariff()
+        if not active_tariff:
+            _LOGGER.error("No active tariff found in configuration")
+            return {}
+        return active_tariff.get("periods", {})
 
     def get_current_period(self):
         now = dt_util.now()
@@ -66,7 +110,11 @@ class EnergyPeriodsCoordinator(DataUpdateCoordinator):
 
 
     def get_prices(self):
-        return self.entry.options.get("prices", {})
+        active_tariff = self._get_active_tariff()
+        if not active_tariff:
+            _LOGGER.error("No active tariff found in configuration")
+            return {}
+        return active_tariff.get("prices", {})
 
     def get_current_price(self):
         period_type = self.get_current_period();

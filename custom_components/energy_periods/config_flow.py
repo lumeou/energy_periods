@@ -1,11 +1,14 @@
 import copy
+import json
 import logging
+from pathlib import Path
 
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.util import dt as dt_util
 import voluptuous as vol
+import aiofiles
 
 from .const import DEFAULT_CONFIG
 from .tariff_engine import validate_periods
@@ -53,13 +56,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
-        # estado persistente del editor
-        self.periods = copy.deepcopy(config_entry.options.get("periods", {}))
-        self.prices = copy.deepcopy(config_entry.options.get("prices", {}))
+        # Estado persistente del editor
+        
+        self.tariffs = copy.deepcopy(config_entry.options.get("tariffs", []))
+
         self._current_day_type = None
         self._edit_price_type = None
 
-        _LOGGER.debug("Periods: %s", self.periods)
+        _LOGGER.debug("Tariffs loaded: %s", self.tariffs)
 
 
     # ----------------------------------------------------
@@ -70,9 +74,8 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_menu(
             step_id="init",
             menu_options=[
-                "working_day",
-                "non_working_day",
-                "prices",
+                "import_tariffs_config",
+                "export_tariffs_config",
                 "save"
             ]
         )
@@ -375,6 +378,128 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_back(self, user_input=None):
         return await self.async_step_init()
 
+    # Tariffs file management
+
+    async def async_step_import_tariffs_config(self, user_input=None):
+        errors = {}
+        
+        if user_input is not None:
+            if user_input.get("action") == "cancel":
+                return await self.async_step_init()
+            
+            if user_input.get("tariffs_json"):
+                json_text = user_input["tariffs_json"].strip()
+                _LOGGER.debug("Reading tariffs from JSON text (length: %d chars)", len(json_text))
+                
+                try:
+                    _LOGGER.debug("JSON content (first 200 chars): %s", json_text[:200])
+                    
+                    # Parsear JSON
+                    config = json.loads(json_text)
+                    _LOGGER.debug("JSON parsed successfully")
+                    
+                    # Validar estructura
+                    self._validate_tariffs_config({"tariffs": config})
+                    _LOGGER.debug("Config validated successfully")
+                    
+                    # Guardar en estado temporal
+                    self.tariffs = config
+                    
+                    _LOGGER.info("Tariffs read from JSON text successfully")
+                    return await self.async_step_init()
+                
+                except json.JSONDecodeError as e:
+                    errors["tariffs_json"] = "invalid_json"
+                    _LOGGER.error("JSON decode error: %s", e)
+                except ValueError as e:
+                    errors["tariffs_json"] = "invalid_config"
+                    _LOGGER.error("Config validation error: %s", e)
+                except Exception as e:
+                    errors["tariffs_json"] = "unknown_error"
+                    _LOGGER.error("Unexpected error loading tariffs: %s", type(e).__name__, exc_info=True)
+        
+        try:
+            return self.async_show_form(
+                step_id="import_tariffs_config",
+                data_schema=vol.Schema({
+                    vol.Optional("tariffs_json", default=""): selector.TextSelector(
+                        selector.TextSelectorConfig(multiline=True)
+                    ),
+                    vol.Required("action", default="accept"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=["cancel", "accept"],
+                            translation_key="action"
+                        )
+                    )
+                }),
+                errors=errors
+            )
+        except Exception as e:
+            _LOGGER.exception("Error showing import_tariffs_config form: %s", e)
+            raise
+      
+    async def async_step_export_tariffs_config(self, user_input=None):
+        """Download current configuration as JSON file."""
+        if user_input is not None:
+            return await self.async_step_init()
+        
+        # Create download link/text
+        config_json = json.dumps(self.tariffs, indent=2, ensure_ascii=False)
+        
+        return self.async_show_form(
+            step_id="export_tariffs_config",
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                "config": config_json,
+                "filename": "tariffs_config.json"
+            }
+        )
+    
+    def _validate_tariffs_config(self, config: dict):
+        if not isinstance(config, dict):
+            raise ValueError("Configuration must be a JSON object")
+        
+        if "tariffs" in config:
+            tariffs = config["tariffs"]
+            if not isinstance(tariffs, list):
+                raise ValueError("'tariffs' must be an array")
+            if len(tariffs) == 0:
+                raise ValueError("'tariffs' array cannot be empty")
+            
+            for i, tariff in enumerate(tariffs):
+                self._validate_tariff(tariff, i)
+        
+        else:
+            raise ValueError("Configuration must have 'tariffs'")
+    
+    def _validate_tariff(self, tariff: dict, index: int):
+        if not isinstance(tariff, dict):
+            raise ValueError(f"Tariff {index} must be a dict")
+        
+        if "periods" not in tariff:
+            raise ValueError(f"Tariff {index} must have 'periods'")
+        
+        periods = tariff["periods"]
+        if not isinstance(periods, dict):
+            raise ValueError(f"Tariff {index} 'periods' must be a dict")
+        
+        for day_type in ["working_day", "non_working_day"]:
+            if day_type in periods:
+                validate_periods(periods[day_type])
+        
+        if "prices" not in tariff:
+            raise ValueError(f"Tariff {index} must have 'prices'")
+        
+        prices = tariff["prices"]
+        if not isinstance(prices, dict):
+            raise ValueError(f"Tariff {index} 'prices' must be a dict")
+        
+        for ptype, price in prices.items():
+            if not isinstance(price, (int, float)):
+                raise ValueError(f"Tariff {index}, price for '{ptype}' must be a number")
+            if price < 0:
+                raise ValueError(f"Tariff {index}, price for '{ptype}' cannot be negative")
+
     # Prices management
 
     async def async_step_prices(self, user_input=None):
@@ -457,18 +582,17 @@ class EnergyPeriodsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_save(self, user_input=None):
 
         try:
-            for day_type in ["working_day", "non_working_day"]:
-                validate_periods(self.periods.get(day_type, []))
+            # Validar períodos en el formato de tariffs
+            for tariff in self.tariffs:
+                for day_type in ["working_day", "non_working_day"]:
+                    if day_type in tariff.get("periods", {}):
+                        validate_periods(tariff["periods"].get(day_type, []))
 
-        except ValueError:
-            return await self.async_step_editor(
-                errors={"base": "overlap"}
-            )
+        except ValueError as e:
+            _LOGGER.error("Validation error: %s", e)
+            return await self.async_step_init()
 
         return self.async_create_entry(
             title="Energy Periods",
-            data={
-                "periods": copy.deepcopy(self.periods),
-                "prices": copy.deepcopy(self.prices)
-            }
+            data={"tariffs": copy.deepcopy(self.tariffs)}
         )

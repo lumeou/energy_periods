@@ -1,6 +1,7 @@
 DOMAIN = "energy_periods"
 
-DEFAULT_CONFIG = {
+# Tarifa por defecto
+DEFAULT_TARIFF = {
     "periods": {
         "working_day": [
             {"start": "00:00", "end": "08:00", "type": "valle"},
@@ -22,4 +23,15 @@ DEFAULT_CONFIG = {
         "llano": 0.116414,
         "punta": 0.185461
     }
+}
+
+# Configuración por defecto: tariff único con rango abierto
+DEFAULT_CONFIG = {
+    "tariffs": [
+        {
+            "from_date": None,  # Desde siempre
+            "to_date": None,    # Hasta siempre
+            **DEFAULT_TARIFF
+        }
+    ]
 }

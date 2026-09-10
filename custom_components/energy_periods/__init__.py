@@ -60,9 +60,8 @@ async def async_setup(hass, config):
 
 async def async_setup_entry(hass, entry):
     sources = entry.data.get("sources", [])
-    periods = entry.options["periods"]
 
-    _LOGGER.debug("Periods: %s", periods)
+    _LOGGER.debug("Setup entry with options: %s", entry.options)
 
     providers = []
 

@@ -24,11 +24,26 @@
       "init": {
         "title": "Entry options",
         "menu_options": {
-          "working_day": "🗓️ Working day",
-          "non_working_day": "🌙 Non-working day",
-          "prices": "💰 Prices",
+          "import_tariffs_config": "📋 Import tariffs configuration",
+          "export_tariffs_config": "📥 View or export tariffs configuration",
           "save": "💾 Save"
         }
+      },
+      "import_tariffs_config": {
+        "title": "Import tariffs configuration",
+        "description": "Set the tariffs configuration.",
+        "data": {
+          "tariffs_json": "Tariffs configuration",
+          "action": "Action"
+        },
+        "data_description": {
+          "tariffs_json": "Paste your tariffs configuration as JSON text.",
+          "action": "Choose what you want to do"
+        }
+      },
+      "export_tariffs_config": {
+        "title": "View tariffs configuration",
+        "description": "Here is your current configuration. Copy this JSON and save it as `{filename}`:\n\n```\n{config}\n```"
       },
       "editor": {
         "description": "Current periods:\n\n{periods}",
@@ -104,7 +119,12 @@
       "overlap": "Periods cannot overlap",
       "required": "El campo es requerido",
       "negative": "Price cannot be negative",
-      "invalid": "Invalid price value"
+      "invalid": "Invalid price value",
+      "invalid_json": "Invalid JSON format. Please check the file syntax.",
+      "invalid_config": "Invalid configuration structure. Check that it has 'tariffs' or 'periods'/'prices'.",
+      "file_not_found": "File not found. Make sure the file path is correct.",
+      "permission_denied": "Permission denied reading file. Check file permissions.",
+      "unknown_error": "Unexpected error loading file. Check the logs."
     }
   },
   "selector": {
@@ -115,7 +135,9 @@
           "delete":   "🗑 Delete",
           "fallback": "⚙️ Fallback",
           "back":     "⬅ Back",
-          "save":     "💾 Save"
+          "save":     "💾 Save",
+          "accept":   "✅ Accept",
+          "cancel":   "❌ Cancel"
       }
     }
   }
