@@ -1,10 +1,10 @@
-# Tariffs Configuration (Phase 2.1)
+# Tariffs Configuration
 
 This document explains how to configure dynamic tariffs using JSON files with date-based ranges.
 
 ## Overview
 
-The Energy Periods integration now supports **tariff configurations with date ranges**, allowing you to:
+The Energy Periods integration supports **tariff configurations with date ranges**, allowing you to:
 
 - Define different periods and prices for different time periods
 - Plan price changes in advance
@@ -13,56 +13,60 @@ The Energy Periods integration now supports **tariff configurations with date ra
 
 ## File Format
 
-### New Format: With Date Ranges
+### Tariffs With Date Ranges
 
 ```json
-{
-  "tariffs": [
-    {
-      "from_date": "2024-01-01",
-      "to_date": "2024-12-31",
+[
+  {
+    "from_date": "2025-01-01",
+    "to_date": "2025-12-31",
+    "consumption": {
       "periods": { ... },
       "prices": { ... }
     },
-    {
-      "from_date": "2025-01-01",
-      "to_date": null,
+    "power": {
+      "periods": { ... },
+      "prices": { ... },
+      "contracted_power": { ... }
+    },
+    "standing_charges": [ ... ]
+  },
+  {
+    "from_date": "2026-01-01",
+    "to_date": null,
+    "consumption": {
       "periods": { ... },
       "prices": { ... }
-    }
-  ]
-}
+    },
+    "power": {
+      "periods": { ... },
+      "prices": { ... },
+      "contracted_power": { ... }
+    },
+    "standing_charges": [ ... ]
+  }
+]
 ```
 
 **Key points:**
 - `from_date`: When this tariff becomes active (format: `YYYY-MM-DD`)
 - `to_date`: When this tariff expires (format: `YYYY-MM-DD` or `null` for open-ended)
+- `consumption`: To define consumption tariff, by defining periods and prices for each period
+- `power`: To define power term tariff, by defining periods and prices plus contracted power for each period
 - `periods`: Time-based periods definition (working_day, non_working_day, fallback)
 - `prices`: Price mappings for each period type
-
-### Legacy Format (Auto-converted)
-
-If you have an existing configuration file in the old format:
-
-```json
-{
-  "periods": { ... },
-  "prices": { ... }
-}
-```
-
-The integration will **automatically convert** it to the new format (single tariff with open-ended range).
+- `standing_charges`: List of other standing charges, by defining some static attributes
 
 ## Configuration Examples
 
-### Example 1: Single Tariff (Legacy equivalent)
+### Example 1: Single Tariff
 
 ```json
-{
-  "tariffs": [
-    {
-      "from_date": null,
-      "to_date": null,
+[
+  {
+    "from_date": null,
+    "to_date": null,
+    "consumption": {
       "periods": {
         "working_day": [
           {"start": "00:00", "end": "08:00", "type": "valle"},
@@ -75,21 +79,43 @@ The integration will **automatically convert** it to the new format (single tari
         "fallback": {"type": "valle"}
       },
       "prices": {
-        "valle": 0.082334,
-        "llano": 0.116414,
-        "punta": 0.185461
+        "valle": 0.08,
+        "llano": 0.11,
+        "punta": 0.19
+      }
+    },
+    "power": {
+      "periods": {
+          "working_day": [
+              {"start": "00:00", "end": "08:00", "type": "valle"},
+              {"start": "08:00", "end": "00:00", "type": "punta"}
+          ],
+          "non_working_day": [
+              {"start": "00:00", "end": "00:00", "type": "valle"}
+          ],
+          "fallback": {
+              "type": "valle"
+          }
+      },
+      "prices": {
+          "punta": 0.11,     # €/kW día P1
+          "valle": 0.03      # €/kW día P2
+      },
+      "contracted_power": {
+          "punta": 4.6,      # kW P1
+          "valle": 4.6       # kW P2
       }
     }
-  ]
-}
+  }
+]
 ```
 
 ### Example 2: Multiple Tariffs with Date Ranges
 
 See `TARIFFS_EXAMPLE.json` for a complete example with:
-- 2024 pricing
-- 2025 pricing (different rates)
-- Automatic switching on Jan 1, 2025
+- 2025 pricing
+- 2026 pricing (different rates)
+- Automatic switching on Jan 1, 2026
 
 ## How to Use
 
@@ -100,9 +126,9 @@ See `TARIFFS_EXAMPLE.json` for a complete example with:
 
 2. **Import in Home Assistant**
    - Open Energy Periods integration options
-   - Click "📋 Tariffs (JSON file)"
+   - Click "📋 Import tariffs"
    - Upload your JSON file
-   - Confirm and save
+   - Accept and save
 
 3. **Verification**
    - The integration will validate the configuration
@@ -114,7 +140,7 @@ See `TARIFFS_EXAMPLE.json` for a complete example with:
 The JSON is validated for:
 
 - ✅ Valid JSON syntax
-- ✅ Required fields: `tariffs`, `periods`, `prices`
+- ✅ Required fields: `consumption`, `power`, and `periods`, `prices` for both
 - ✅ Tariff dates format (YYYY-MM-DD or null)
 - ✅ Period time format (HH:MM)
 - ✅ No overlapping periods within a day type
@@ -153,13 +179,6 @@ On June 15, 2024: **Tariff A is used** (first match in array order)
 
 **Recommendation:** Avoid overlaps or use non-overlapping ranges.
 
-## Future Features (Phase 2.2+)
-
-- YAML format support in `configuration.yaml`
-- Import/export from UI
-- Visual date range editor
-- Tariff templates library
-
 ## Troubleshooting
 
 ### "Invalid JSON format"
@@ -167,13 +186,13 @@ On June 15, 2024: **Tariff A is used** (first match in array order)
 - Ensure proper quotes and commas
 
 ### "Invalid configuration structure"
-- Missing `tariffs` key (for new format)
+- Missing `consumption` or `power` keys
 - Missing `periods` or `prices` keys
-- `tariffs` is empty array
+- Initial object is not an array or is an empty array
 
 ### "Periods cannot overlap"
 - Check time ranges in each tariff's periods
-- Example issue: `"08:00" → "10:00"` overlaps with `"10:00" → "12:00"` (should be `"08:00" → "10:00"` and `"10:00" → "12:00"`)
+- Example issue: `"08:00" → "10:00"` overlaps with `"09:00" → "12:00"` (should be `"08:00" → "10:00"` and `"10:00" → "12:00"`)
 
 ### Price not applied
 - Verify period type name matches between periods and prices

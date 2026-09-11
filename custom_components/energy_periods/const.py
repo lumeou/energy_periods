@@ -11,7 +11,7 @@ DEFAULT_CONSUMPTION_TARIFF = {
             {"start": "10:00", "end": "14:00", "type": "punta"},
             {"start": "14:00", "end": "18:00", "type": "llano"},
             {"start": "18:00", "end": "22:00", "type": "punta"},
-            {"start": "22:00", "end": "00:00", "type": "llano"},
+            {"start": "22:00", "end": "00:00", "type": "llano"}
         ],
         "non_working_day": [
             {"start": "00:00", "end": "00:00", "type": "valle"}
@@ -41,12 +41,12 @@ DEFAULT_POWER_TARIFF = {
         }
     },
     "prices": {
-        "punta": 0.110283,     # €/kW día P1
-        "valle": 0.033469      # €/kW día P2
+        "punta": 0.110283,  # €/kW día P1
+        "valle": 0.033469   # €/kW día P2
     },
     "contracted_power": {
-        "punta": 4.6,           # kW P1
-        "valle": 4.6            # kW P2
+        "punta": 4.6,       # kW P1
+        "valle": 4.6        # kW P2
     }
 }
 
