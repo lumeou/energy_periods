@@ -8,14 +8,14 @@ from homeassistant.util import dt as dt_util
 
 from .providers import get_provider
 from .coordinator import EnergyPeriodsCoordinator
-from .history import async_backfill_price_history
+from .history import async_backfill_energy_consumption_price_history, async_backfill_power_term_daily_price_history, async_backfill_standing_charge_history
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-SERVICE_REBUILD_PRICE_HISTORY = "rebuild_price_history"
+SERVICE_REBUILD_SENSOR_HISTORY = "rebuild_sensor_history"
 
-REBUILD_PRICE_HISTORY_SCHEMA = vol.Schema({
+REBUILD_SENSOR_HISTORY_SCHEMA = vol.Schema({
     vol.Required("config_entry_id"): cv.string,
     vol.Required("start_date"): cv.date,
     vol.Optional("end_date"): cv.date,
@@ -25,7 +25,7 @@ REBUILD_PRICE_HISTORY_SCHEMA = vol.Schema({
 async def async_setup(hass, config):
     """Registro de servicios a nivel de componente (una sola vez)."""
 
-    async def _async_handle_rebuild_price_history(call):
+    async def _async_handle_rebuild_sensor_history(call):
         entry_id = call.data["config_entry_id"]
         entry = hass.config_entries.async_get_entry(entry_id)
 
@@ -40,7 +40,7 @@ async def async_setup(hass, config):
                 f"La entrada '{entry.title}' no está cargada actualmente"
             )
 
-        await async_backfill_price_history(
+        await async_backfill_energy_consumption_price_history(
             hass,
             entry,
             coordinator,
@@ -48,29 +48,46 @@ async def async_setup(hass, config):
             call.data.get("end_date"),
         )
 
+        await async_backfill_power_term_daily_price_history(
+            hass,
+            entry,
+            coordinator,
+            call.data["start_date"],
+            call.data.get("end_date"),
+        )
+
+        await async_backfill_standing_charge_history(
+            hass,
+            entry,
+            coordinator,
+            call.data["start_date"],
+            call.data.get("end_date"),
+        )
+        
+
     hass.services.async_register(
         DOMAIN,
-        SERVICE_REBUILD_PRICE_HISTORY,
-        _async_handle_rebuild_price_history,
-        schema=REBUILD_PRICE_HISTORY_SCHEMA,
+        SERVICE_REBUILD_SENSOR_HISTORY,
+        _async_handle_rebuild_sensor_history,
+        schema=REBUILD_SENSOR_HISTORY_SCHEMA,
     )
 
     return True
 
 
 async def async_setup_entry(hass, entry):
-    sources = entry.data.get("sources", [])
+    holiday_sources = entry.options.get("holiday_sources", [])
 
     _LOGGER.debug("Setup entry with options: %s", entry.options)
 
     providers = []
 
-    for s in sources:
+    for hs in holiday_sources:
         provider = get_provider(
-            s.get("type", "ics"),
+            hs.get("type", "ics"),
             {
-                "source": s["source"],
-                "tag": s["tag"]
+                "source": hs["source"],
+                "tag": hs["tag"]
             }
         )
         providers.append(provider)
@@ -90,40 +107,7 @@ async def async_setup_entry(hass, entry):
         entry, ["sensor", "binary_sensor"]
     )
 
-    await _async_maybe_backfill_on_setup(hass, entry, coordinator)
-
     return True
-
-
-async def _async_maybe_backfill_on_setup(hass, entry, coordinator):
-    """Lanza el backfill inicial la primera vez que se crea la entrada.
-
-    Se controla con el flag `_history_backfilled` en `entry.data` para no
-    repetirlo en cada reinicio/recarga de Home Assistant. Ese flag se
-    persiste con `async_update_entry`, lo que dispara `update_listener`;
-    como éste solo recarga la entrada si cambian `options` (no `data`), no
-    provoca una recarga adicional.
-    """
-    backfill_from = entry.data.get("backfill_from")
-
-    if not backfill_from or entry.data.get("_history_backfilled"):
-        return
-
-    start_date = dt_util.parse_date(backfill_from)
-    if start_date is None:
-        _LOGGER.warning("backfill_from inválido: %s", backfill_from)
-        return
-
-    async def _run():
-        try:
-            await async_backfill_price_history(hass, entry, coordinator, start_date)
-        finally:
-            hass.config_entries.async_update_entry(
-                entry,
-                data={**entry.data, "_history_backfilled": True},
-            )
-
-    hass.async_create_task(_run())
 
 
 async def update_listener(hass, entry):

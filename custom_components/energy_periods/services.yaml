@@ -1,8 +1,8 @@
-rebuild_price_history:
-  name: Reconstruir histórico de precio
+rebuild_sensor_history:
+  name: Reconstruir histórico de valores de sensores
   description: >-
-    Recalcula y escribe el histórico horario (long-term statistics) del
-    sensor de precio de una entrada de Energy Periods, desde una fecha dada.
+    Recalcula y escribe el histórico horario (long-term statistics) de los
+    sensores numéricos de una entrada de Energy Periods, desde una fecha dada.
     Útil para ampliar el histórico ya existente o volver a generarlo tras un
     cambio. No comprueba si el calendario de festivos configurado cubre esas
     fechas: si el ICS no incluye años antiguos, esos días no se detectarán
